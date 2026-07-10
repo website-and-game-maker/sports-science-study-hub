@@ -65,9 +65,11 @@ Career Bachelor Thing/                ← parent folder (the user's originals li
 ### Key interactions
 - **Dropdown menu nav** — sections group by depth and *mix media* (Overviews = short audio +
   video + deck; Deep Dives = long audio + video + deck; Reports; Reference).
-- **Guided tours** (`Explore` menu / hero buttons) — full-screen overlay that steps through the
-  same files with ← → arrows. Quick = 8 stops (~10 min), Deep = 12 stops (~90 min). The final
-  cover step has an in-slide CTA button (Quick → launches Deep; Deep → closes).
+- **Guided tours** (`Tours` menu / hero buttons) — full-screen overlay that steps through the
+  same files with ← → arrows. Quick = 5 stops (~10 min), Deep = 8 stops (~90 min). A "deck"-type
+  stop embeds a full interactive mini slideshow (own prev/next + thumbnails + fullscreen); a
+  "doc"-type stop embeds the full PDF inline via an iframe. The final cover step has an in-slide
+  CTA button (Quick → launches Deep; Deep → closes).
 - **Slideshow decks** — first "slide" is the companion video (themed to the deck), then the
   rendered PNG slides. Arrows + keyboard + thumbnail strip.
 
@@ -249,4 +251,63 @@ and closed out the two items that were "Still deferred" above, plus a separate b
   `prefers-reduced-motion` covers the new hover-scale transition. `_source/build_site.py`'s
   `deck()` template was updated to match, so regeneration doesn't lose the button.
 
-_Last updated after the fullscreen deck viewer pass (2026-07-10)._
+## 11. Tour: embedded decks + inline PDF reports (2026-07-10)
+
+Changed how the guided tours (`window.TOURS`, `renderStep()` in `app.js`) present slideshows and
+reports, per explicit request — previously each "image" step showed one static slide PNG as its
+own separate tour stop, and each "doc" step showed a thumbnail + an "Open the report →" link that
+left the tour to view the PDF in a new tab.
+
+- ✅ **Slideshows collapsed to one stop per deck.** Quick tour's four `image` steps (playbook
+  s-01/s-03/s-05/s-11) and Deep tour's five `image` steps (blueprint s-01/s-03/s-06/s-08/s-10) are
+  now each a single new `"type":"deck"` step (`{"type":"deck","deckId":"playbook"|"blueprint",...}`)
+  that embeds the **entire interactive deck viewer** inline — same prev/next buttons, thumbnail
+  strip, and fullscreen toggle as the main-page decks. This reuses `initDeck()` as-is rather than
+  forking a separate implementation: `initDeck(stage)` already only depends on the `stage` element
+  passed to it plus its DOM ancestor structure (`.deck > .stage[data-deck] + .deck-foot > .thumbs`),
+  so `renderStep()` just builds that same markup shape inside the tour stage and calls
+  `initDeck(deckStageEl)` on it. One tweak was needed for reuse: the tour-embedded deck has no
+  companion-video intro slide (that video already has its own separate tour stop right before it),
+  so `initDeck()`'s starting index and `go()` clamp are now `intro ? -1 : 0` instead of always `-1`
+  — decks with a `[data-intro]` block (main page) behave exactly as before; decks without one (the
+  tour embed) open straight on slide 1.
+- ✅ **PDFs embedded inline via `<iframe>`.** Each `doc` step (still one stop per report — 3 in the
+  Deep tour) now renders `<iframe src="…pdf">` sized to `62vh` inside the tour stage (which already
+  scrolls — `.tour-stage{overflow:auto}` — so a long report just scrolls the dialog), the same
+  embedding pattern `#pdfModal`/`[data-modal-frame]` already uses elsewhere on the page. Kept an
+  explicit "Open in new tab ↗" + "⬇ Download PDF" fallback alongside it, since (per the gotchas in
+  §4) some strict `file://` setups block iframed local PDFs. Dropped the now-unused `thumb` field
+  from the doc steps' data.
+- ✅ **Stop counts updated.** Quick tour: 8 → **5 stops** (`≈ 10 minutes · 5 stops`, cover-step copy
+  "8 short stops" → "5 short stops"). Deep tour: 12 → **8 stops** (`≈ 90 minutes · 8 stops`); its
+  three doc steps were renumbered 8/9/10 → 4/5/6 to match. The "Stop X / Y" progress counter itself
+  needed no change — it's computed from `steps.length` automatically.
+- ✅ **Keyboard: no fighting between tour arrows and the embedded deck.** The tour's own
+  document-level ArrowLeft/ArrowRight handler now also bails out when the event target is inside
+  `.tslide.deck` (the embedded deck's stage, its prev/next buttons, or its thumbnails) — same idea
+  as the pre-existing guard that already let a focused `<video>`/`<audio>` keep its own arrow keys.
+  The embedded deck's own prev/next buttons and thumbnail strip remain the way to navigate within
+  it; the tour's ← → still move between tour stops otherwise. Also added an Escape-key guard
+  (`embeddedDeckIsFullscreen()`): if the embedded deck is fullscreen (native Fullscreen API or the
+  manual `.is-fullscreen` fallback) when Escape is pressed, the tour no longer also closes itself
+  on that same keypress — Escape just backs the deck out of fullscreen first, as expected.
+- ✅ **CSS** — new `.tslide.deck` / `.tslide.doc-embed` rules following the existing `.tslide.*`
+  convention in the "tour slide content" section. `.tslide.deck` nests the same `.deck`/`.stage`/
+  `.deck-foot` classes the main-page decks use (so it inherits all of that component's styling for
+  free — card chrome, nav buttons, counter, thumbnails, fullscreen), just capping `.stage`'s height
+  to `52vh` so it fits comfortably in the tour dialog. Removed the now-dead `.tslide .doc-tour`
+  rules (replaced by `.tslide.doc-embed .doc-frame`/`.doc-fallback`).
+- ✅ `_source/build_site.py`'s `tours` dict was updated to match `index.html` exactly — verified by
+  running `python3 _source/build_site.py` and diffing: only the `window.TOURS = {...}` line changed
+  (no unrelated reversions to transcripts or other generator inputs).
+- ⚠️ **Known minor limitation, not fixed:** each time a tour "deck" step is (re-)rendered (e.g. the
+  user navigates away and back to it), `renderStep()` rebuilds the stage's markup from scratch and
+  calls `initDeck()` again on the fresh element. `initDeck()`'s fullscreen handling registers a few
+  `document`-level listeners (`fullscreenchange` variants + Escape) per call, which aren't torn
+  down — they just become inert once their captured `stage` element is discarded (the old listeners
+  check `nativeFsEl() === stage` against a detached node, so they no-op harmlessly), but they do
+  accumulate for the life of the page. Not a problem for realistic use (a person clicking through a
+  tour a handful of times per session), so left alone rather than reworking `initDeck()`'s fullscreen
+  lifecycle to add cleanup — flagging in case it matters for a future refactor.
+
+_Last updated after the tour embedded-deck / inline-PDF pass (2026-07-10)._

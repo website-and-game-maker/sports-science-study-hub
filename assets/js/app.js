@@ -68,7 +68,10 @@
     var introVideo = intro ? intro.querySelector("video") : null;
     var counter = stage.querySelector("[data-counter]");
     var thumbBar = stage.parentElement.querySelector("[data-thumbs]");
-    var idx = -1;
+    // Decks with no companion-video intro (e.g. the tour-embedded mini deck, which has no
+    // [data-intro] block because the video already gets its own separate tour stop) should
+    // open straight on slide 1 instead of an empty "Intro" state.
+    var idx = intro ? -1 : 0;
 
     thumbSrcs.forEach(function (src, i) {
       var t = document.createElement("img");
@@ -92,7 +95,7 @@
       }
       thumbEls.forEach(function (el, i) { el.classList.toggle("active", i === idx); });
     }
-    function go(i) { idx = Math.max(-1, Math.min(slides.length - 1, i)); render(); }
+    function go(i) { var min = intro ? -1 : 0; idx = Math.max(min, Math.min(slides.length - 1, i)); render(); }
     stage.querySelector("[data-next]").addEventListener("click", function () { go(idx + 1); });
     stage.querySelector("[data-prev]").addEventListener("click", function () { go(idx - 1); });
     stage.setAttribute("tabindex", "0");
@@ -278,13 +281,40 @@
       } else if (step.type === "image") {
         h = '<div class="tslide"><h3>' + esc(step.title) + '</h3><p class="cap">' + esc(step.cap) + '</p>' +
             '<img src="' + step.src + '" alt="' + esc(step.title) + '"></div>';
+      } else if (step.type === "deck") {
+        // One tour stop = one fully interactive mini deck viewer (prev/next, thumbnail strip,
+        // fullscreen) — same markup shape as the main-page decks, minus the companion-video
+        // intro slide (that video already gets its own separate tour stop). initDeck() is
+        // reused as-is below once this markup is in the DOM.
+        var deckData = (window.DECKS || {})[step.deckId] || { slides: [] };
+        var initialCounter = deckData.slides.length ? ("1 / " + deckData.slides.length) : "";
+        h = '<div class="tslide deck"><h3>' + esc(step.title) + '</h3><p class="cap">' + esc(step.cap) + '</p>' +
+            '<div class="deck tour-deck">' +
+              '<div class="stage" data-deck="' + esc(step.deckId) + '">' +
+                '<img data-slideimg alt="' + esc(step.title) + ' slide" style="display:none">' +
+                '<button class="nav-btn prev" data-prev aria-label="Previous slide">‹</button>' +
+                '<button class="nav-btn next" data-next aria-label="Next slide">›</button>' +
+                '<div class="counter"><span data-counter>' + esc(initialCounter) + '</span></div>' +
+                '<button class="nav-btn fs-btn" data-fullscreen aria-label="Enter fullscreen" aria-pressed="false">⛶</button>' +
+              '</div>' +
+              '<div class="deck-foot"><div class="thumbs" data-thumbs></div></div>' +
+            '</div></div>';
       } else if (step.type === "doc") {
-        h = '<div class="tslide"><h3>' + esc(step.title) + '</h3><p class="cap">' + esc(step.cap) + '</p>' +
-            '<div class="doc-tour"><img src="' + step.thumb + '" alt="">' +
-            '<a class="btn primary lg" href="' + step.pdf + '" target="_blank" rel="noopener">Open the report →</a></div></div>';
+        // Full inline PDF, same iframe-embedding pattern as #pdfModal — plus an explicit
+        // fallback link since some strict file:// setups block iframed local PDFs.
+        h = '<div class="tslide doc-embed"><h3>' + esc(step.title) + '</h3><p class="cap">' + esc(step.cap) + '</p>' +
+            '<div class="doc-frame"><iframe src="' + step.pdf + '" title="' + esc(step.title) + '"></iframe></div>' +
+            '<div class="doc-fallback">' +
+              '<a class="btn primary" href="' + step.pdf + '" target="_blank" rel="noopener">Open in new tab ↗</a>' +
+              '<a class="btn" href="' + step.pdf + '" download>⬇ Download PDF</a>' +
+            '</div></div>';
       }
       stage.innerHTML = h;
       stage.scrollTop = 0;
+      if (step.type === "deck") {
+        var deckStageEl = stage.querySelector(".stage[data-deck]");
+        if (deckStageEl) initDeck(deckStageEl);
+      }
       var ctaEl = stage.querySelector("[data-tour-cta]");
       if (ctaEl) ctaEl.addEventListener("click", function () {
         var t = ctaEl.getAttribute("data-tour-cta");
@@ -339,13 +369,28 @@
       go(at + 1);
     });
     tourEl.querySelector("[data-tour-close]").addEventListener("click", close);
+    // True while an embedded deck (inside a "deck"-type tour stop) is fullscreen, whether via
+    // the real Fullscreen API or the manual .is-fullscreen fallback — so a stray Escape press
+    // that's really meant to back out of fullscreen doesn't also close the whole tour.
+    function embeddedDeckIsFullscreen() {
+      var fsEl = document.fullscreenElement || document.webkitFullscreenElement ||
+        document.mozFullScreenElement || document.msFullscreenElement;
+      if (fsEl && tourEl.contains(fsEl)) return true;
+      return !!tourEl.querySelector(".stage.is-fullscreen");
+    }
     // clicking a cover CTA via the Next button is handled above; also allow CTA cover to advance
     document.addEventListener("keydown", function (e) {
       if (!tourEl.classList.contains("show")) return;
-      if (e.key === "Escape") { close(); return; }
+      if (e.key === "Escape") {
+        if (embeddedDeckIsFullscreen()) return; // let the deck's own fullscreen-exit handle this press
+        close(); return;
+      }
       if (e.key === "Tab") { trapTab(e, tourEl.querySelector(".tour-box")); return; }
       var tag = e.target && e.target.tagName;
       if (tag === "VIDEO" || tag === "AUDIO") return; // let media handle arrow keys
+      // An embedded deck (prev/next buttons, thumbnails, fullscreen toggle) has its own
+      // arrow-key handling (see initDeck) — don't let the tour's own arrows fight with it.
+      if (e.target && e.target.closest && e.target.closest(".tslide.deck")) return;
       if (e.key === "ArrowRight") go(at + 1);
       if (e.key === "ArrowLeft") go(at - 1);
     });

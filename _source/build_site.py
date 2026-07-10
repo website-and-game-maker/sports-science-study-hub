@@ -104,31 +104,24 @@ blueprint_deck = deck("blueprint","blueprint","Tactical Blueprint: Engineering a
 # ---- guided tour data ----
 tours = {
   "quick": {
-    "title":"Quick Digest","meta":"≈ 10 minutes · 8 stops","accent":"quick",
+    "title":"Quick Digest","meta":"≈ 10 minutes · 5 stops","accent":"quick",
     "steps":[
-      {"type":"cover","title":"Quick Digest","sub":"The fastest way to get the whole picture. Use the arrows (or ← →) to move through 8 short stops.","meta":"≈ 10 minutes"},
+      {"type":"cover","title":"Quick Digest","sub":"The fastest way to get the whole picture. Use the arrows (or ← →) to move through 5 short stops.","meta":"≈ 10 minutes"},
       {"type":"audio","title":"1 · The 60-second brief","cap":"The entire field in one breath — why it matters, the roles, and how to get in.","src":SHORT_AUD,"shell":"cool"},
       {"type":"video","title":"2 · Sports Science Overview","cap":"A friendly 6-minute intro to the people behind elite performance.","src":OVERVIEW_VID,"poster":"assets/thumbs/overview_poster.png"},
-      {"type":"image","title":"3 · The pitch","cap":"The Playbook opens by reframing what a sports career means today.","src":"assets/slides/playbook/s-01.png"},
-      {"type":"image","title":"4 · Why now — NEP 2020","cap":"Policy change opened the door to non-biology students at many universities.","src":"assets/slides/playbook/s-03.png"},
-      {"type":"image","title":"5 · Where to apply","cap":"The 'draft board' of flexible vs traditional institutions.","src":"assets/slides/playbook/s-05.png"},
-      {"type":"image","title":"6 · The playcall","cap":"A four-step action plan to break in.","src":"assets/slides/playbook/s-11.png"},
+      {"type":"deck","title":"3 · The Playbook — full deck","cap":"Browse the entire 11-slide deck below — swipe, click, or use fullscreen to read every slide.","deckId":"playbook"},
       {"type":"cover","title":"That's the digest","sub":"Want the full story — institutions, salaries, certifications and the 50-minute deep dive? Launch the Deep Dive tour.","meta":"Next: Deep Dive","cta":"deep"},
     ]},
   "deep": {
-    "title":"Deep Dive","meta":"≈ 90 minutes · 12 stops","accent":"deep",
+    "title":"Deep Dive","meta":"≈ 90 minutes · 8 stops","accent":"deep",
     "steps":[
       {"type":"cover","title":"Deep Dive","sub":"The complete walkthrough: the long-form audio, the detailed video, the technical deck, and all three reports.","meta":"≈ 90 minutes · settle in"},
       {"type":"audio","title":"1 · The 50-minute conversation","cap":"A two-host deep dive covering every angle. Press play and let it run.","src":LONG_AUD,"shell":"warm"},
       {"type":"video","title":"2 · The Career Path (detailed)","cap":"8.5 minutes, five chapters — the boom, myths, curriculum, labs and careers.","src":CAREER_VID,"poster":"assets/thumbs/career_poster.png"},
-      {"type":"image","title":"3 · The blueprint","cap":"A tactical roadmap for interdisciplinary high-school profiles.","src":"assets/slides/blueprint/s-01.png"},
-      {"type":"image","title":"4 · NEP reconfigures the field","cap":"How the policy dismantled the old stream silos.","src":"assets/slides/blueprint/s-03.png"},
-      {"type":"image","title":"5 · The eligibility matrix","cap":"Exactly which institutions accept non-biology students — and which don't.","src":"assets/slides/blueprint/s-06.png"},
-      {"type":"image","title":"6 · The curriculum escalator","cap":"How a four-year B.Sc. builds from foundations to honours research.","src":"assets/slides/blueprint/s-08.png"},
-      {"type":"image","title":"7 · Careers & compensation","cap":"Roles, employers and the certifications that unlock them.","src":"assets/slides/blueprint/s-10.png"},
-      {"type":"doc","title":"8 · Report — Academic Pathways","cap":"Admission frameworks, curriculum architecture and career roles.","pdf":"assets/pdf/academic-pathways.pdf","thumb":"assets/thumbs/academic-pathways-1.png"},
-      {"type":"doc","title":"9 · Report — Evolution of Education","cap":"Flexible vs rigid pathways and the 'premier lab' differentiator.","pdf":"assets/pdf/evolution-education.pdf","thumb":"assets/thumbs/evolution-education-1.png"},
-      {"type":"doc","title":"10 · Report — Strategic Roadmap","cap":"The full playbook: subjects → expertise, certifications, and a checklist.","pdf":"assets/pdf/strategic-roadmap.pdf","thumb":"assets/thumbs/strategic-roadmap-1.png"},
+      {"type":"deck","title":"3 · The Blueprint — full deck","cap":"Browse the entire 12-slide technical deck below — swipe, click, or use fullscreen to read every slide.","deckId":"blueprint"},
+      {"type":"doc","title":"4 · Report — Academic Pathways","cap":"Admission frameworks, curriculum architecture and career roles.","pdf":"assets/pdf/academic-pathways.pdf"},
+      {"type":"doc","title":"5 · Report — Evolution of Education","cap":"Flexible vs rigid pathways and the 'premier lab' differentiator.","pdf":"assets/pdf/evolution-education.pdf"},
+      {"type":"doc","title":"6 · Report — Strategic Roadmap","cap":"The full playbook: subjects → expertise, certifications, and a checklist.","pdf":"assets/pdf/strategic-roadmap.pdf"},
       {"type":"cover","title":"You've seen it all","sub":"Everything above is also browsable any time from the menu. Head to the Reference cheat-sheet to keep the key facts handy.","meta":"Done","cta":"close"},
     ]},
 }
