@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tours — Sports Science Careers in India</title>
+<meta name="description" content="Guided, full-screen walkthroughs of the whole study hub — a 10-minute Quick Digest or a 90-minute Deep Dive, no browsing required.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="dot"></span> Sports Science Careers · India</a>
+    <div class="nav-links" data-menu>
+
+      <a class="nav-flat" href="tours.html">Tours</a>
+
+      <div class="menu">
+        <button class="menu-btn" data-menu-btn aria-haspopup="true" aria-expanded="false">Overviews <span class="caret">▾</span></button>
+        <div class="menu-panel">
+          <a class="menu-item" href="overviews.html#a-short"><b>🎧 The 60-second brief</b><span>Listen · 1 min</span></a>
+          <a class="menu-item" href="overviews.html#v-overview"><b>🎬 Sports Science Overview</b><span>Watch · 6 min</span></a>
+          <a class="menu-item" href="overviews.html#playbook"><b>🖼️ The High-Performance Playbook</b><span>Skim · 11 slides</span></a>
+        </div>
+      </div>
+
+      <div class="menu">
+        <button class="menu-btn" data-menu-btn aria-haspopup="true" aria-expanded="false">Deep Dives <span class="caret">▾</span></button>
+        <div class="menu-panel">
+          <a class="menu-item" href="deepdives.html#a-long"><b>🎧 The 50-minute deep dive</b><span>Listen · 50 min</span></a>
+          <a class="menu-item" href="deepdives.html#v-career"><b>🎬 The Career Path (detailed)</b><span>Watch · 8.5 min</span></a>
+          <a class="menu-item" href="deepdives.html#blueprint"><b>🖼️ The Tactical Blueprint</b><span>Skim · 12 slides</span></a>
+        </div>
+      </div>
+
+      <div class="menu">
+        <button class="menu-btn" data-menu-btn aria-haspopup="true" aria-expanded="false">Reports <span class="caret">▾</span></button>
+        <div class="menu-panel">
+          <a class="menu-item" href="reports.html#doc-academic"><b>📄 Academic Pathways</b><span>Read · overview</span></a>
+          <a class="menu-item" href="reports.html#doc-evolution"><b>📄 Evolution of Education</b><span>Read · analysis</span></a>
+          <a class="menu-item" href="reports.html#doc-strategic"><b>📄 Strategic Roadmap</b><span>Read · strategy</span></a>
+        </div>
+      </div>
+
+      <a class="nav-flat" href="library.html">Media Library</a>
+      <a class="nav-flat" href="reference.html">Reference</a>
+    </div>
+    <button class="hamburger" data-hamburger aria-label="Menu" aria-expanded="false">☰</button>
+  </div>
+</nav>
+
+<section class="section" id="tours-intro">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Guided walkthroughs</div>
+      <h2>Tours</h2>
+      <p>Don't want to browse section by section? Launch a full-screen guided walkthrough that steps you through the whole story in order, with the video, audio, slideshow and reports embedded right in the flow — pick how deep you want to go.</p>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <div class="body">
+          <div class="badges"><span class="badge type">Tour</span><span class="badge easy">Quick</span><span class="badge time">⏱ ≈ 10 min</span></div>
+          <h3>⚡ Quick Digest tour</h3>
+          <p>5 stops: the 60-second brief, the overview video, the full High-Performance Playbook deck, and where to go next.</p>
+          <div class="row-actions"><button class="btn primary lg tour-launch" data-tour="quick">⚡ Launch the Quick Digest tour</button></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="body">
+          <div class="badges"><span class="badge type">Tour</span><span class="badge deep">Deep</span><span class="badge time">⏱ ≈ 90 min</span></div>
+          <h3>🔬 Deep Dive tour</h3>
+          <p>8 stops: the full 50-minute conversation, the detailed Career Path video, the Tactical Blueprint deck, and all three reports — embedded inline, no tab-switching.</p>
+          <div class="row-actions"><button class="btn primary lg tour-launch" data-tour="deep">🔬 Launch the Deep Dive tour</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="wrap">
+    <div><b>Sports Science Careers in India</b> — a NotebookLM-sourced study hub, organized for easy digest and fact-checked July 2026.</div>
+    <div class="src"><span>2 videos · 2 audio · 2 decks · 3 reports</span></div>
+  </div>
+</footer>
+
+<!-- TOUR OVERLAY -->
+<div class="tour" id="tour" aria-hidden="true">
+  <div class="tour-box" role="dialog" aria-modal="true" aria-label="Guided tour">
+    <div class="tour-top">
+      <span class="tour-title" data-tour-title></span>
+      <span class="tour-progress" data-tour-progress></span>
+      <button class="tour-x" data-tour-close aria-label="Close tour">×</button>
+    </div>
+    <div class="tour-stage" data-tour-stage aria-live="polite"></div>
+    <button class="tour-arrow prev" data-tour-prev aria-label="Previous">‹</button>
+    <button class="tour-arrow next" data-tour-next aria-label="Next">›</button>
+    <div class="tour-dots" data-tour-dots></div>
+  </div>
+</div>
+
+<script>window.DECKS=window.DECKS||{};window.DECKS["playbook"]={slides:["assets/slides/playbook/s-01.png","assets/slides/playbook/s-02.png","assets/slides/playbook/s-03.png","assets/slides/playbook/s-04.png","assets/slides/playbook/s-05.png","assets/slides/playbook/s-06.png","assets/slides/playbook/s-07.png","assets/slides/playbook/s-08.png","assets/slides/playbook/s-09.png","assets/slides/playbook/s-10.png","assets/slides/playbook/s-11.png"],thumbs:["assets/slides/playbook/tn/s-01.png","assets/slides/playbook/tn/s-02.png","assets/slides/playbook/tn/s-03.png","assets/slides/playbook/tn/s-04.png","assets/slides/playbook/tn/s-05.png","assets/slides/playbook/tn/s-06.png","assets/slides/playbook/tn/s-07.png","assets/slides/playbook/tn/s-08.png","assets/slides/playbook/tn/s-09.png","assets/slides/playbook/tn/s-10.png","assets/slides/playbook/tn/s-11.png"]};</script>
+<script>window.DECKS=window.DECKS||{};window.DECKS["blueprint"]={slides:["assets/slides/blueprint/s-01.png","assets/slides/blueprint/s-02.png","assets/slides/blueprint/s-03.png","assets/slides/blueprint/s-04.png","assets/slides/blueprint/s-05.png","assets/slides/blueprint/s-06.png","assets/slides/blueprint/s-07.png","assets/slides/blueprint/s-08.png","assets/slides/blueprint/s-09.png","assets/slides/blueprint/s-10.png","assets/slides/blueprint/s-11.png","assets/slides/blueprint/s-12.png"],thumbs:["assets/slides/blueprint/tn/s-01.png","assets/slides/blueprint/tn/s-02.png","assets/slides/blueprint/tn/s-03.png","assets/slides/blueprint/tn/s-04.png","assets/slides/blueprint/tn/s-05.png","assets/slides/blueprint/tn/s-06.png","assets/slides/blueprint/tn/s-07.png","assets/slides/blueprint/tn/s-08.png","assets/slides/blueprint/tn/s-09.png","assets/slides/blueprint/tn/s-10.png","assets/slides/blueprint/tn/s-11.png","assets/slides/blueprint/tn/s-12.png"]};</script>
+<script>window.TOURS = {"quick": {"title": "Quick Digest", "meta": "\u2248 10 minutes \u00b7 5 stops", "accent": "quick", "steps": [{"type": "cover", "title": "Quick Digest", "sub": "The fastest way to get the whole picture. Use the arrows (or \u2190 \u2192) to move through 5 short stops.", "meta": "\u2248 10 minutes"}, {"type": "audio", "title": "1 \u00b7 The 60-second brief", "cap": "The entire field in one breath \u2014 why it matters, the roles, and how to get in.", "src": "assets/media/Explaining%20Sports%20Science%20short%20%281%20min%29.m4a", "shell": "cool"}, {"type": "video", "title": "2 \u00b7 Sports Science Overview", "cap": "A friendly 6-minute intro to the people behind elite performance.", "src": "assets/media/Sports%20Science%20Overview.mp4", "poster": "assets/thumbs/overview_poster.png"}, {"type": "deck", "title": "3 \u00b7 The Playbook \u2014 full deck", "cap": "Browse the entire 11-slide deck below \u2014 swipe, click, or use fullscreen to read every slide.", "deckId": "playbook"}, {"type": "cover", "title": "That's the digest", "sub": "Want the full story \u2014 institutions, salaries, certifications and the 50-minute deep dive? Launch the Deep Dive tour.", "meta": "Next: Deep Dive", "cta": "deep"}]}, "deep": {"title": "Deep Dive", "meta": "\u2248 90 minutes \u00b7 8 stops", "accent": "deep", "steps": [{"type": "cover", "title": "Deep Dive", "sub": "The complete walkthrough: the long-form audio, the detailed video, the technical deck, and all three reports.", "meta": "\u2248 90 minutes \u00b7 settle in"}, {"type": "audio", "title": "1 \u00b7 The 50-minute conversation", "cap": "A two-host deep dive covering every angle. Press play and let it run.", "src": "assets/media/Explaining%20Sports%20Science%20long%20%2850%20min%29.m4a", "shell": "warm"}, {"type": "video", "title": "2 \u00b7 The Career Path (detailed)", "cap": "8.5 minutes, five chapters \u2014 the boom, myths, curriculum, labs and careers.", "src": "assets/media/Career%20Path%20Stuff.mp4", "poster": "assets/thumbs/career_poster.png"}, {"type": "deck", "title": "3 \u00b7 The Blueprint \u2014 full deck", "cap": "Browse the entire 12-slide technical deck below \u2014 swipe, click, or use fullscreen to read every slide.", "deckId": "blueprint"}, {"type": "doc", "title": "4 \u00b7 Report \u2014 Academic Pathways", "cap": "Admission frameworks, curriculum architecture and career roles.", "pdf": "assets/pdf/academic-pathways.pdf"}, {"type": "doc", "title": "5 \u00b7 Report \u2014 Evolution of Education", "cap": "Flexible vs rigid pathways and the 'premier lab' differentiator.", "pdf": "assets/pdf/evolution-education.pdf"}, {"type": "doc", "title": "6 \u00b7 Report \u2014 Strategic Roadmap", "cap": "The full playbook: subjects \u2192 expertise, certifications, and a checklist.", "pdf": "assets/pdf/strategic-roadmap.pdf"}, {"type": "cover", "title": "You've seen it all", "sub": "Everything above is also browsable any time from the menu. Head to the Reference cheat-sheet to keep the key facts handy.", "meta": "Done", "cta": "close"}]}};</script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

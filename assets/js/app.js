@@ -45,16 +45,22 @@
     menus.forEach(function (m) { m.classList.remove("open"); });
     syncMenuAria();
   });
+  var hb = document.querySelector("[data-hamburger]");
+  var navLinks = document.querySelector(".nav-links");
+  function syncHamburgerAria() {
+    if (hb && navLinks) hb.setAttribute("aria-expanded", navLinks.classList.contains("open") ? "true" : "false");
+  }
   // close menus + mobile nav when a menu link is clicked
   document.querySelectorAll(".menu-item, .nav-flat").forEach(function (a) {
     a.addEventListener("click", function () {
       menus.forEach(function (m) { m.classList.remove("open"); });
-      var nl = document.querySelector(".nav-links"); if (nl) nl.classList.remove("open");
+      if (navLinks) navLinks.classList.remove("open");
+      syncHamburgerAria();
     });
   });
-  var hb = document.querySelector("[data-hamburger]");
   if (hb) hb.addEventListener("click", function () {
-    document.querySelector(".nav-links").classList.toggle("open");
+    if (navLinks) navLinks.classList.toggle("open");
+    syncHamburgerAria();
   });
 
   /* ---------------- Slideshow decks ---------------- */

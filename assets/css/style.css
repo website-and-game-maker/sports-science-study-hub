@@ -63,7 +63,7 @@ a:hover { text-decoration: underline; }
 .section:nth-child(even) { background: var(--panel); }
 
 /* ---------- Typography ---------- */
-h1, h2, h3 { font-family: var(--font-display); line-height: 1.12; margin: 0 0 .4em; letter-spacing: -.02em; color: var(--ink); }
+h1, h2, h3, h4 { font-family: var(--font-display); line-height: 1.12; margin: 0 0 .4em; letter-spacing: -.02em; color: var(--ink); }
 /* Data / labels ride a monospace face — the field is about turning the body into measurements. */
 .eyebrow {
   font-family: var(--font-mono);
@@ -135,7 +135,7 @@ h1, h2, h3 { font-family: var(--font-display); line-height: 1.12; margin: 0 0 .4
 }
 .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
 .card .body { padding: 22px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
-.card h3 { font-size: 1.22rem; margin: 0; }
+.card h3, .card h4 { font-size: 1.22rem; margin: 0; }
 .card p { margin: 0; color: var(--muted); font-size: .96rem; }
 
 .badges { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -256,7 +256,7 @@ audio { border-radius: 8px; }
 .doc { display: grid; grid-template-columns: 132px 1fr; gap: 18px; }
 .doc .thumb { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; box-shadow: var(--shadow-sm); }
 .doc .thumb img { aspect-ratio: 8.5/11; object-fit: cover; }
-.doc .meta h3 { margin: 0 0 6px; font-size: 1.12rem; }
+.doc .meta h3, .doc .meta h4 { margin: 0 0 6px; font-size: 1.12rem; }
 .doc .meta p { font-size: .92rem; }
 .doc .actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
 

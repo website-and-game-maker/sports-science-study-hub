@@ -1,5 +1,14 @@
 #!/usr/bin/env python3
-# Generates index.html for the Sports Science Careers study hub.
+#
+# *** STALE — DO NOT RUN EXPECTING CURRENT OUTPUT ***
+# The deployed site is now 7 separate pages (index.html, tours.html, overviews.html,
+# deepdives.html, reports.html, library.html, reference.html) with media localized
+# into assets/media/. This script still only emits the OLD single-page layout below.
+# Running it will silently overwrite the current index.html with that stale layout —
+# see HANDOFF.md §3 and §13 before touching this file. Regaining generator parity
+# with the 7-page site is a real follow-up task, not yet done.
+#
+# Generates the OLD single-page index.html for the Sports Science Careers study hub.
 # Structure: dropdown-menu nav (Overviews / Deep Dives / Reports) mixing media,
 # two guided arrow-tours (Quick / Deep), a cross-cutting Media Library (browse by
 # format: video / audio / slideshow / report, regardless of depth-tier), and a
@@ -188,7 +197,7 @@ page = f"""<!DOCTYPE html>
       <a class="nav-flat" href="#library">Media Library</a>
       <a class="nav-flat" href="#reference">Reference</a>
     </div>
-    <button class="hamburger" data-hamburger aria-label="Menu">☰</button>
+    <button class="hamburger" data-hamburger aria-label="Menu" aria-expanded="false">☰</button>
   </div>
 </nav>
 
@@ -539,3 +548,5 @@ page = f"""<!DOCTYPE html>
 os.makedirs(os.path.dirname(OUT), exist_ok=True)
 open(OUT, "w").write(page)
 print("wrote", OUT, len(page), "bytes")
+print("\n*** WARNING: this overwrote index.html with the OLD single-page layout. ***")
+print("*** The real site is 7 pages (tours/overviews/deepdives/reports/library/reference.html) — see HANDOFF.md §3/§13. ***")

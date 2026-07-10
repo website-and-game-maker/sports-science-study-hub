@@ -1,44 +1,60 @@
 # Sports Science Careers — Study Hub · Handoff / Debug Guide
 
-A single-page static website that organizes NotebookLM-generated study material
+A multi-page static website that organizes NotebookLM-generated study material
 (2 videos, 2 audio files, 2 slide decks, 3 PDF reports) about **B.Sc. Sports &
-Exercise Science careers in India** into an easy-to-digest hub.
+Exercise Science careers in India** into an easy-to-digest hub. Originally built as a
+single scrolling page, then split into separate pages (§9 in the changelog below) and
+made fully self-contained for deployment (§13).
 
-Built to be opened directly from disk (`file://`) — no server or build step required
-to *view* it. There is an optional Python generator for regenerating the HTML.
+Built to be opened directly from disk (`file://`) or served as a static site (e.g.
+GitHub Pages) — no build step required to *view* it. There is an optional Python
+generator for regenerating `index.html`, but it currently only knows how to produce the
+**old single-page layout** — see the note in §3.
 
 ---
 
 ## 1. How to open / preview
 
-- Just open `index.html` in a browser (double-click, or `file://…/Website/index.html`).
-- Everything is relative-path based, so the whole `Website/` folder is portable **as long
-  as it stays next to the original media files** (see §4).
+- Open `index.html` in a browser (double-click, or `file://…/Website/index.html`), or serve
+  the `Website/` folder with any static file server (`python3 -m http.server`) and open it,
+  or visit the deployed GitHub Pages URL.
+- All 7 pages and all media are self-contained inside `Website/` — the folder no longer needs
+  to sit next to the original source media (see §4, gotcha 1 — this used to be a real
+  requirement and no longer is).
 
 ---
 
 ## 2. File map
 
 ```
-Career Bachelor Thing/                ← parent folder (the user's originals live here)
-├─ Sports Science Overview.mp4        ← referenced by the site via ../
+Career Bachelor Thing/                       ← parent folder (the user's originals live here,
+│                                                untouched — Website/ has its own copies now)
+├─ Sports Science Overview.mp4
 ├─ Career Path Stuff.mp4
 ├─ Explaining Sports Science short (1 min).m4a
 ├─ Explaining Sports Science long (50 min).m4a
 ├─ Sports_Science_Career_Playbook.pptx
 ├─ Modern_Sports_Science_Career_Blueprint.pptx
 ├─ (3 source PDFs)
-└─ Website/                           ← THE SITE
-   ├─ index.html                      ← generated page (structure + embedded transcripts + TOURS data)
-   ├─ HANDOFF.md                      ← this file
-   ├─ _source/                        ← reproducibility: generator + transcripts
-   │  ├─ build_site.py                ← regenerates index.html
-   │  └─ transcripts/                 ← whisper transcripts (txt + json w/ timestamps)
+└─ Website/                                  ← THE SITE (self-contained, deployable as-is)
+   ├─ index.html                             ← Home: hero + "where to go next" link-cards
+   ├─ tours.html                             ← Tours: Quick Digest / Deep Dive launch cards
+   ├─ overviews.html                         ← Overviews: 60-sec brief, overview video, Playbook deck
+   ├─ deepdives.html                         ← Deep Dives: 50-min audio, Career Path video, Blueprint deck
+   ├─ reports.html                           ← Reports: 3 PDF report cards + PDF modal
+   ├─ library.html                           ← Media Library: browse everything by format
+   ├─ reference.html                         ← Reference: fact-checked cheat-sheet tables
+   ├─ HANDOFF.md                             ← this file
+   ├─ _source/                               ← reproducibility: generator + transcripts
+   │  ├─ build_site.py                       ← regenerates the OLD single-page index.html only (§3)
+   │  └─ transcripts/                        ← whisper transcripts (txt + json w/ timestamps)
    └─ assets/
-      ├─ css/style.css                ← all styling (design tokens at top under :root)
-      ├─ js/app.js                    ← all interactivity (no framework, vanilla JS)
-      ├─ pdf/                         ← copies of the 3 reports (embedded via modal iframe)
-      ├─ thumbs/                      ← PDF first-page thumbs + video posters
+      ├─ css/style.css                       ← all styling (design tokens at top under :root)
+      ├─ js/app.js                           ← all interactivity (no framework, vanilla JS)
+      ├─ media/                              ← local copies of the 6 large source files (§13) —
+      │                                         videos, audio, .pptx decks, referenced by all 7 pages
+      ├─ pdf/                                ← copies of the 3 reports (embedded via modal iframe)
+      ├─ thumbs/                             ← PDF first-page thumbs + video posters
       └─ slides/
          ├─ blueprint/  s-01..s-12.png (+ tn/ thumbnails)
          └─ playbook/   s-01..s-11.png (+ tn/ thumbnails)
@@ -48,24 +64,39 @@ Career Bachelor Thing/                ← parent folder (the user's originals li
 
 ## 3. Architecture (what to know before editing)
 
-**No framework.** Plain HTML + one CSS file + one JS file (IIFE). Safe to refactor.
+**No framework.** Plain HTML + one CSS file + one JS file (IIFE), 7 pages. Safe to refactor.
 
-- **`index.html`** is emitted by `_source/build_site.py`. If you change page *structure* or
-  *copy*, prefer editing the generator and re-running it (`python3 _source/build_site.py`)
-  so transcripts/tours stay in sync — but editing `index.html` directly is fine too if you
-  don't plan to regenerate.
-- **Transcripts** are embedded inline in `index.html` (inside `<details>` panels). They were
-  produced with faster-whisper (`tiny` model) — good but not perfect; fix typos if you spot them
-  (e.g. "Pro-Cobody" → "Pro Kabaddi", "canyzeology" → "kinesiology").
-- **`window.DECKS`** (inline `<script>` per deck) holds slide image paths for the slideshow viewer.
-- **`window.TOURS`** (inline `<script>` near the bottom) holds the guided-tour step data.
-- **`app.js`** wires five things: dropdown nav, slideshow decks, PDF modal, audio chapter-seek,
-  and the guided tour engine. Each is a clearly-commented block.
+- **⚠️ `_source/build_site.py` is out of sync with the real site.** It still only generates the
+  *old single-page* `index.html` layout (pre-split). The 7-page structure, the fullscreen deck
+  toggle, the embedded tour decks/PDFs, the Media Library section, and the localized
+  `assets/media/` paths were all added/changed by hand across `index.html` and the 6 other page
+  files without updating the generator (a full multi-page rewrite of `build_site.py` was judged
+  out of scope for that pass). **Do not run `build_site.py` expecting it to regenerate the current
+  site** — it will only produce a stale single-page version. If you want generator parity back,
+  that's a real follow-up task: teach it to emit `tours.html`/`overviews.html`/`deepdives.html`/
+  `reports.html`/`library.html`/`reference.html` plus the localized media paths.
+- Until that rewrite happens, **edit the 7 HTML files directly** for any structural/copy changes,
+  and keep the shared nav/footer markup byte-for-byte identical across all 7 (see any page for
+  the current canonical nav block).
+- **Transcripts** are embedded inline in `overviews.html` / `deepdives.html` (inside `<details>`
+  panels). They were produced with faster-whisper (`tiny` model) — good but not perfect; fix
+  typos if you spot them (e.g. "Pro-Cobody" → "Pro Kabaddi", "canyzeology" → "kinesiology").
+- **`window.DECKS`** (inline `<script>` per deck) holds slide image paths for the slideshow
+  viewer — lives on `overviews.html` (playbook) and `deepdives.html` (blueprint).
+- **`window.TOURS`** (inline `<script>`) holds the guided-tour step data — present on both
+  `index.html` (hero CTA buttons) and `tours.html` (its own launch cards); identical on both.
+- **`app.js`** wires: dropdown nav, slideshow decks (+ fullscreen), the PDF modal, audio/video
+  chapter-seek, and the guided tour engine (with embedded deck/PDF stops). Every block is guarded
+  (`if (element) {...}`) so it's safe to include `app.js` on every page even though most pages
+  only use a subset of its features — a page missing a given element (e.g. no `#tour` on
+  `overviews.html`) just makes that block a no-op, it doesn't error.
 
 ### Key interactions
-- **Dropdown menu nav** — sections group by depth and *mix media* (Overviews = short audio +
-  video + deck; Deep Dives = long audio + video + deck; Reports; Reference).
-- **Guided tours** (`Tours` menu / hero buttons) — full-screen overlay that steps through the
+- **Nav** — `Tours`, `Media Library`, and `Reference` are flat links straight to their own page;
+  `Overviews`, `Deep Dives`, and `Reports` are dropdowns whose items link to an anchor on their
+  respective page (e.g. `overviews.html#playbook`). The brand/logo links to `index.html` from
+  every page.
+- **Guided tours** (`Tours` page / hero buttons on `index.html`) — full-screen overlay that steps through the
   same files with ← → arrows. Quick = 5 stops (~10 min), Deep = 8 stops (~90 min). A "deck"-type
   stop embeds a full interactive mini slideshow (own prev/next + thumbnails + fullscreen); a
   "doc"-type stop embeds the full PDF inline via an iframe. The final cover step has an in-slide
@@ -77,15 +108,26 @@ Career Bachelor Thing/                ← parent folder (the user's originals li
 
 ## 4. Gotchas / things to watch
 
-1. **Large media is referenced via `../`** (not copied) to avoid duplicating ~170 MB. If the
-   `Website/` folder is moved away from the originals, videos/audio/`.pptx` downloads break.
-   Fix: either keep them together, or copy the originals into `assets/media/` and update paths.
+1. ~~Large media is referenced via `../` (not copied)~~ — **fixed (§13):** all 6 large source
+   files now live in `assets/media/` inside `Website/`, so the folder is fully self-contained
+   and portable. If you ever add new source media, copy it into `assets/media/` too rather than
+   reaching outside `Website/` again — a deployed static host (GitHub Pages, etc.) has no access
+   to anything outside the repo it's given.
 2. **Filenames with spaces/parens** are URL-encoded in the HTML (`%20`, `%28`, `%29`). Keep that
    if you rename anything.
-3. **PDF inline view** uses an `<iframe>` to a local file — works in Chrome/Safari/Firefox from
-   `file://`. Some strict setups block it; the ⬇ PDF button is the fallback.
-4. **Emoji in menu labels** render fine on macOS; they showed as boxes only in the headless test
+3. **Case sensitivity on real hosting.** This was built on macOS, which is case-insensitive, but
+   GitHub Pages (and most static hosts) run case-sensitive filesystems. A path that "works" locally
+   with mismatched case will silently 404 once deployed — if you rename or add an asset, make sure
+   every reference matches the on-disk filename's case exactly.
+4. **PDF inline view** uses an `<iframe>` to a local file — works in Chrome/Safari/Firefox from
+   `file://`. Some strict setups block it; the ⬇ PDF button is the fallback. The guided tour's
+   embedded PDF stops use the same iframe approach with the same fallback link.
+5. **Emoji in menu labels** render fine on macOS; they showed as boxes only in the headless test
    environment (missing emoji font) — not a real issue.
+6. **`app.js` is one shared file across all 7 pages** but every feature block guards on
+   `document.getElementById`/`querySelector` existing first — a page that doesn't have, say, the
+   `#pdfModal` element just skips that block harmlessly. If you add a new interactive feature,
+   keep this guard pattern so the shared script stays safe to include everywhere.
 
 ---
 
@@ -354,4 +396,43 @@ overviews and the reports."*
   deck viewer's fullscreen toggle (§10) or the guided tour's internals — those were being
   worked on concurrently on other branches.
 
-_Last updated after the Media Library (browse-by-format) pass (2026-07-10)._
+## 13. Split into 7 pages + localized media for deployment (2026-07-10)
+
+Two more explicit user follow-ups: "Everything is still on the same webpage. The 5 dropdown
+sections should be their own webpage," and separately, "Put this on a GitHub Pages, and give me
+that as a final product."
+
+**Page split:**
+- The single scrolling `index.html` was divided into 7 files, all siblings directly inside
+  `Website/`: `index.html` (now just Home — hero + a new "where to go next" link-card section),
+  `tours.html` (new — the two tour-launch cards promoted from a small nav dropdown into real page
+  content), `overviews.html`, `deepdives.html`, `reports.html`, `library.html`, `reference.html`
+  (each a verbatim copy of its old same-named section's content).
+- Nav is byte-for-byte identical across all 7 pages: `Tours` / `Media Library` / `Reference` are
+  flat links to their own page; `Overviews` / `Deep Dives` / `Reports` stay dropdowns but their
+  items now link to `page.html#anchor` instead of an in-page `#anchor`.
+- Only `index.html` and `tours.html` include the tour overlay markup + `window.TOURS` script
+  (they're the only pages with tour-launch triggers); only `reports.html` includes the PDF modal
+  (its "Read inline" buttons need it). Every other page just includes `app.js`, whose feature
+  blocks no-op harmlessly when their target element isn't present (see §3, gotcha 6).
+- `library.html`'s "Jump to..." links were rewritten from same-page anchors to cross-page ones
+  (e.g. `#v-overview` → `overviews.html#v-overview`) since the content they point at moved to a
+  different file.
+- Built via 7 parallel agents, each writing to a distinct new file (only `index.html` was an
+  edit to an existing file) so there was no shared-file contention; each verified its own page
+  byte-for-byte against a frozen pre-split snapshot before it was deleted.
+- ⚠️ `_source/build_site.py` was **not** updated for the multi-page structure — see the warning
+  in §3. It still only regenerates the old single-page layout.
+
+**Media localized for deployment:**
+- The 6 large source files (2 videos, 2 audio, 2 `.pptx` decks — previously referenced via `../`
+  from outside `Website/`) were copied into `Website/assets/media/`, and every reference across
+  `index.html`, `tours.html`, `overviews.html`, and `deepdives.html` (the only 4 pages that had
+  any) was rewritten from `../Filename` to `assets/media/Filename`, preserving the existing
+  URL-encoding for spaces/parens. Verified zero outward `../` references remain anywhere in the
+  site. Originals in the parent folder were copied, never modified or moved.
+- Total `Website/` size ≈ 247 MB; largest single file ≈ 93 MB (the 50-minute audio) — comfortably
+  under GitHub's 100 MB hard per-file limit, so no Git LFS is needed (a routine "large file"
+  warning on push is expected and harmless).
+
+_Last updated after the page-split + media-localization pass (2026-07-10)._
