@@ -359,8 +359,25 @@ table.ref tbody tr:hover { background: var(--panel-2); }
 .tslide.cover .k { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .16em; font-size: .74rem; font-weight: 700; color: var(--blue); }
 .tslide.cover h3 { font-size: clamp(2rem, 5vw, 3rem); margin: 8px 0 14px; }
 .tslide.cover p { max-width: 54ch; color: var(--muted); font-size: 1.1rem; }
-.tslide .doc-tour { display: flex; gap: 20px; align-items: center; justify-content: center; flex-wrap: wrap; }
-.tslide .doc-tour img { max-height: 40vh; }
+/* Embedded slideshow deck (one tour stop = one full mini deck viewer). Nesting the same
+   .deck/.stage/.deck-foot markup the main-page decks use means it picks up all of that
+   component's styling — card chrome, nav buttons, counter, thumbnail strip, fullscreen —
+   for free; .tour-deck only tweaks sizing to fit comfortably inside .tour-stage. */
+.tslide.deck { max-width: 880px; text-align: left; }
+.tslide.deck h3, .tslide.deck p.cap { text-align: center; }
+.tslide.deck .tour-deck { margin: 0 auto; }
+.tslide.deck .tour-deck .stage { aspect-ratio: 16 / 9; max-height: 52vh; }
+
+/* Inline PDF report embed (one tour stop = one full scrollable report), same iframe pattern
+   as #pdfModal. .tour-stage already scrolls (overflow:auto) so a tall report just scrolls
+   the stage rather than needing its own internal scrollbar logic. */
+.tslide.doc-embed { max-width: 760px; }
+.tslide.doc-embed .doc-frame {
+  width: 100%; height: 62vh; min-height: 360px; border-radius: 12px; overflow: hidden;
+  box-shadow: var(--shadow-md); background: #fff;
+}
+.tslide.doc-embed iframe { border: 0; width: 100%; height: 100%; display: block; }
+.tslide.doc-embed .doc-fallback { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
 
 /* ---------- Reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
