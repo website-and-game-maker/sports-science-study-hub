@@ -66,7 +66,7 @@ Career Bachelor Thing/                ← parent folder (the user's originals li
 - **Dropdown menu nav** — sections group by depth and *mix media* (Overviews = short audio +
   video + deck; Deep Dives = long audio + video + deck; Reports; Reference).
 - **Guided tours** (`Explore` menu / hero buttons) — full-screen overlay that steps through the
-  same files with ← → arrows. Quick = 8 stops (~10 min), Deep = 11 stops (~90 min). The final
+  same files with ← → arrows. Quick = 8 stops (~10 min), Deep = 12 stops (~90 min). The final
   cover step has an in-slide CTA button (Quick → launches Deep; Deep → closes).
 - **Slideshow decks** — first "slide" is the companion video (themed to the deck), then the
   rendered PNG slides. Arrows + keyboard + thumbnail strip.
@@ -179,10 +179,47 @@ Inter-for-everything default):
 Source media/decks/PDFs left untouched.
 
 ### Still deferred
-- The 50-minute deep-dive transcript still has residual ASR errors (it's ~52 KB — lower priority).
-- Wire the *video* chapter timestamps to seek the `<video>` (audio ones already seek; video ones
-  are intentionally label-only for now).
 - Optional: `<track>` captions, dark-mode, lazy-loading the long inline transcript.
 
-_Last updated after the second review pass: code/a11y fixes + telemetry type system + independent
-web re-fact-check._
+## 8. Completeness pass (2026-07-10)
+
+A follow-up pass verified every "✅ Applied" bullet in §6/§7 against the actual code (all held up)
+and closed out the two items that were "Still deferred" above, plus a separate bug in the generator:
+
+- ✅ **Video chapter timestamps now seek** — both `<video>` cards (`v-overview`, `v-career`) got
+  `id="vid-overview"` / `id="vid-career"`, and their chapter lists now use the same
+  `<a data-seek data-video="...">` pattern the audio chapters already used. `app.js`'s seek handler
+  was generalized (`data-audio || data-video` → one shared `media` element) so both audio and
+  video chapters play synchronously on click and seek once `loadedmetadata` fires (Safari-safe).
+  `build_site.py`'s `chap_html()` gained a `video_id` param so regeneration stays in sync.
+- ✅ **50-minute deep-dive transcript (`a-long`) ASR garbles fixed** — ~45 clear proper-noun/word
+  garbles corrected in both `index.html` and `_source/transcripts/long.txt` (kept in sync), e.g.
+  "broco body league"→"Pro Kabaddi league", "Granchized"→"Franchised", "Jane University"→"Jain
+  University", "Somaya"→"Somaiya", "S-Rire"→"SRIHER", "STGT"→"SGT", "IPO"→"IPL" (cricket context),
+  "six-lact/14-lact"→"six lakh/14 lakh", "ACSMEP"→"ACSM-EP", "W-Op"→"WHOOP", "Orra"→"Oura",
+  "Tajisupha's National Institute"→"Netaji Subhas National Institute", among others. Content
+  otherwise preserved verbatim.
+- 🔧 **`_source/build_site.py` hardcoded sandbox paths fixed** — `OUT`/`TR` were absolute paths from
+  a different machine (`/sessions/trusting-eager-turing/...`); now derived from the script's own
+  location (`Website/_source/build_site.py` → writes `Website/index.html`, reads
+  `Website/_source/transcripts/`), so the generator actually runs on this machine.
+- 🔧 While fixing the generator, found it had drifted from the hand-edited `index.html` (the design
+  pass and code-review fixes were applied directly to `index.html` but never back-ported): the
+  Space Grotesk/Space Mono font `<link>`, `class="num"` on the fee/pay table cells, and
+  `role="dialog" aria-modal="true"` on the tour box and PDF modal were all missing from the
+  generator's template. All three are now added to `build_site.py` so regeneration matches the
+  shipped page.
+- ⚠️ **Known remaining staleness (not fixed, flagging only):** `_source/transcripts/short.txt` and
+  `overview.txt` still contain the *pre-fix* garbled text (e.g. "Pro-Cobody", "any P20", "canyzeology",
+  "Jane"/"Somaya") even though the corresponding transcripts in `index.html` were already corrected
+  during the second review pass — that correction was never written back to the source `.txt`
+  files. Regenerating from `build_site.py` today will therefore revert `a-short` and `v-overview`'s
+  transcripts to the old garbled text. Was intentionally left alone this pass (out of the
+  authorized scope of touching those two files); worth a follow-up to sync them from `index.html`.
+  Also spotted but left untouched (same reason — out of scope, and/or low confidence): "Coca-Labin"
+  (a-short) is very likely a garbled clinic name; `v-career`'s transcript still has the same class
+  of institution-name garbles as the old `a-long` (e.g. "Mahay and Manapal", "Jane University",
+  "Samaya Sports Academy"); and in `a-long`, "beat elegance"/"beat logic" (rowing biomechanics tool)
+  and "mission pitch vision" (cricket ball-tracking) could not be confidently identified.
+
+_Last updated after the completeness pass (2026-07-10)._

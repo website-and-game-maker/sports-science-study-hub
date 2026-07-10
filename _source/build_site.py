@@ -5,8 +5,11 @@
 # Facts corrected after web verification (see HANDOFF.md).
 import json, html, re, os
 
-OUT = "/sessions/trusting-eager-turing/mnt/Career Bachelor Thing/Website/index.html"
-TR  = "/sessions/trusting-eager-turing/mnt/outputs/transcripts"
+# Portable paths: this script lives at Website/_source/build_site.py, so derive
+# everything from its own location rather than hardcoding a sandbox path.
+_HERE = os.path.dirname(os.path.abspath(__file__))
+OUT = os.path.join(_HERE, "..", "index.html")
+TR  = os.path.join(_HERE, "transcripts")
 
 def esc(s): return html.escape(s)
 def read(p): return open(os.path.join(TR, p)).read().strip()
@@ -48,12 +51,14 @@ long_chapters = [("0:00","The hidden science behind the spectacle"),("2:42","Two
     ("30:40","Internships: JSW & Inspire Institute"),("36:00","Career roles & compensation"),
     ("41:49","Global certifications (CSCS, ACSM)"),("44:57","Master's degrees & long-term growth")]
 
-def chap_html(chs, audio_id=None):
+def chap_html(chs, audio_id=None, video_id=None):
     rows = []
     for t, label in chs:
         m, s = t.split(":"); secs = int(m)*60 + int(s)
         if audio_id:
             rows.append(f'<li><span class="t"><a href="#" data-seek="{secs}" data-audio="{audio_id}">{t}</a></span><span>{esc(label)}</span></li>')
+        elif video_id:
+            rows.append(f'<li><span class="t"><a href="#" data-seek="{secs}" data-video="{video_id}">{t}</a></span><span>{esc(label)}</span></li>')
         else:
             rows.append(f'<li><span class="t">{t}</span><span>{esc(label)}</span></li>')
     return '<ul class="chaplist">' + ''.join(rows) + '</ul>'
@@ -138,7 +143,7 @@ page = f"""<!DOCTYPE html>
 <meta name="description" content="An organized, easy-to-digest hub of videos, audio, slideshows and reports on B.Sc. Sports &amp; Exercise Science careers in India, including flexible pathways for students without Class XII Biology.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -234,12 +239,12 @@ page = f"""<!DOCTYPE html>
       </div>
 
       <div class="card" id="v-overview">
-        <div class="media-frame"><video controls preload="none" poster="assets/thumbs/overview_poster.png" src="{OVERVIEW_VID}"></video></div>
+        <div class="media-frame"><video id="vid-overview" controls preload="none" poster="assets/thumbs/overview_poster.png" src="{OVERVIEW_VID}"></video></div>
         <div class="body">
           <div class="badges"><span class="badge type">Video</span><span class="badge easy">Easy</span><span class="badge time">⏱ 6 min</span></div>
           <h3>Sports Science Overview</h3>
           <p>The friendly introduction: the team behind the athletes, high-performance vs clinical roles, and your pathway in.</p>
-          <details class="disclosure"><summary>Chapters</summary><div class="content">{chap_html(overview_chapters)}</div></details>
+          <details class="disclosure"><summary>Chapters</summary><div class="content">{chap_html(overview_chapters, video_id="vid-overview")}</div></details>
           <details class="disclosure"><summary>Read transcript</summary><div class="content">{paras(overview_t,4)}</div></details>
         </div>
       </div>
@@ -273,12 +278,12 @@ page = f"""<!DOCTYPE html>
       </div>
 
       <div class="card" id="v-career">
-        <div class="media-frame"><video controls preload="none" poster="assets/thumbs/career_poster.png" src="{CAREER_VID}"></video></div>
+        <div class="media-frame"><video id="vid-career" controls preload="none" poster="assets/thumbs/career_poster.png" src="{CAREER_VID}"></video></div>
         <div class="body">
           <div class="badges"><span class="badge type">Video</span><span class="badge medium">In-depth</span><span class="badge time">⏱ 8.5 min</span></div>
           <h3>The Career Path (detailed)</h3>
           <p>Five chapters: the boom, eligibility myths, the curriculum, labs &amp; internships, and lucrative careers.</p>
-          <details class="disclosure"><summary>Chapters</summary><div class="content">{chap_html(career_chapters)}</div></details>
+          <details class="disclosure"><summary>Chapters</summary><div class="content">{chap_html(career_chapters, video_id="vid-career")}</div></details>
           <details class="disclosure"><summary>Read transcript</summary><div class="content">{paras(career_t,4)}</div></details>
         </div>
       </div>
@@ -341,15 +346,15 @@ page = f"""<!DOCTYPE html>
       <table class="ref">
         <thead><tr><th>Institution</th><th>Program</th><th>Non-Biology?</th><th>Selection</th><th>Approx. fee / yr*</th></tr></thead>
         <tbody>
-          <tr><td>Jain University (Bangalore)</td><td>B.Sc. Sports Sciences</td><td><span class="pill yes">Eligible</span></td><td>JET Exam + Interview; bridge modules</td><td>≈ ₹1,00,000</td></tr>
-          <tr><td>Somaiya Sports Academy (Mumbai)</td><td>B.Sc. Sports &amp; Exercise Science</td><td><span class="pill yes">Eligible</span></td><td>SVUET + Fitness Test + Interview</td><td>₹2,35,000</td></tr>
-          <tr><td>Symbiosis (SSSS, Pune)</td><td>B.Sc. Sports &amp; Exercise Science</td><td><span class="pill yes">Eligible</span></td><td>SET Exam + Field Test + PIWAT</td><td>≈ ₹1,66,000</td></tr>
-          <tr><td>SGT University (Gurgaon)</td><td>B.Sc. Sports &amp; Exercise Sciences</td><td><span class="pill yes">Eligible</span></td><td>10+2 Merit or CUET</td><td>₹1,20,000</td></tr>
-          <tr><td>IGIPESS (Delhi University)</td><td>B.Sc. Sports Science</td><td><span class="pill yes">Eligible</span></td><td>CUET + Physical Test (45% agg.)</td><td>≈ ₹10,000–13,000</td></tr>
-          <tr><td>Woxsen University (Hyderabad)</td><td>B.Sc. Sports Science</td><td><span class="pill yes">Eligible</span></td><td>WAT or CUET + Interview</td><td>≈ ₹6,50,000</td></tr>
-          <tr><td>MAHE (Manipal)</td><td>B.Sc. Exercise &amp; Sports Science</td><td><span class="pill no">Requires PCB (Biology)</span></td><td>MET Exam + Interview</td><td>≈ ₹1,85,000</td></tr>
-          <tr><td>SRIHER (Chennai)</td><td>B.Sc. (Hons) Sports &amp; Exercise Science</td><td><span class="pill no">Requires PCB / PCBM 70%</span></td><td>10+2 Science merit + Interview</td><td>≈ ₹75,000</td></tr>
-          <tr><td>IISM (Mumbai)</td><td>Bachelor of Sports Science</td><td><span class="pill no">Requires PCB (Biology)</span></td><td>SSAT + SOP + Video Interview</td><td>≈ ₹2,70,000</td></tr>
+          <tr><td>Jain University (Bangalore)</td><td>B.Sc. Sports Sciences</td><td><span class="pill yes">Eligible</span></td><td>JET Exam + Interview; bridge modules</td><td class="num">≈ ₹1,00,000</td></tr>
+          <tr><td>Somaiya Sports Academy (Mumbai)</td><td>B.Sc. Sports &amp; Exercise Science</td><td><span class="pill yes">Eligible</span></td><td>SVUET + Fitness Test + Interview</td><td class="num">₹2,35,000</td></tr>
+          <tr><td>Symbiosis (SSSS, Pune)</td><td>B.Sc. Sports &amp; Exercise Science</td><td><span class="pill yes">Eligible</span></td><td>SET Exam + Field Test + PIWAT</td><td class="num">≈ ₹1,66,000</td></tr>
+          <tr><td>SGT University (Gurgaon)</td><td>B.Sc. Sports &amp; Exercise Sciences</td><td><span class="pill yes">Eligible</span></td><td>10+2 Merit or CUET</td><td class="num">₹1,20,000</td></tr>
+          <tr><td>IGIPESS (Delhi University)</td><td>B.Sc. Sports Science</td><td><span class="pill yes">Eligible</span></td><td>CUET + Physical Test (45% agg.)</td><td class="num">≈ ₹10,000–13,000</td></tr>
+          <tr><td>Woxsen University (Hyderabad)</td><td>B.Sc. Sports Science</td><td><span class="pill yes">Eligible</span></td><td>WAT or CUET + Interview</td><td class="num">≈ ₹6,50,000</td></tr>
+          <tr><td>MAHE (Manipal)</td><td>B.Sc. Exercise &amp; Sports Science</td><td><span class="pill no">Requires PCB (Biology)</span></td><td>MET Exam + Interview</td><td class="num">≈ ₹1,85,000</td></tr>
+          <tr><td>SRIHER (Chennai)</td><td>B.Sc. (Hons) Sports &amp; Exercise Science</td><td><span class="pill no">Requires PCB / PCBM 70%</span></td><td>10+2 Science merit + Interview</td><td class="num">≈ ₹75,000</td></tr>
+          <tr><td>IISM (Mumbai)</td><td>Bachelor of Sports Science</td><td><span class="pill no">Requires PCB (Biology)</span></td><td>SSAT + SOP + Video Interview</td><td class="num">≈ ₹2,70,000</td></tr>
         </tbody>
       </table>
     </div>
@@ -362,11 +367,11 @@ page = f"""<!DOCTYPE html>
           <table class="ref">
             <thead><tr><th>Role</th><th>Entry (0–2 yr)</th><th>With experience</th><th>Key credential</th></tr></thead>
             <tbody>
-              <tr><td>Sports Biomechanist / Movement Analyst</td><td>₹3–6 L</td><td>₹12–14 L</td><td>B.Sc. Hons + VICON 3D</td></tr>
-              <tr><td>High-Performance Sports Scientist</td><td>₹4.5–6.8 L</td><td>₹10–18 L</td><td>ACSM-EP + Python/SQL</td></tr>
-              <tr><td>Strength &amp; Conditioning Coach</td><td>₹3–6 L</td><td>up to ₹10 L</td><td>NSCA-CSCS</td></tr>
-              <tr><td>Corporate Wellness (Coach → Mgr)</td><td>₹4–6 L</td><td>₹10–16 L</td><td>ACSM-EP</td></tr>
-              <tr><td>Rehab / Sports Physiotherapist</td><td>₹2.5–4 L</td><td>₹5–6 L+</td><td>MPT / Cert. Athletic Trainer</td></tr>
+              <tr><td>Sports Biomechanist / Movement Analyst</td><td class="num">₹3–6 L</td><td class="num">₹12–14 L</td><td>B.Sc. Hons + VICON 3D</td></tr>
+              <tr><td>High-Performance Sports Scientist</td><td class="num">₹4.5–6.8 L</td><td class="num">₹10–18 L</td><td>ACSM-EP + Python/SQL</td></tr>
+              <tr><td>Strength &amp; Conditioning Coach</td><td class="num">₹3–6 L</td><td class="num">up to ₹10 L</td><td>NSCA-CSCS</td></tr>
+              <tr><td>Corporate Wellness (Coach → Mgr)</td><td class="num">₹4–6 L</td><td class="num">₹10–16 L</td><td>ACSM-EP</td></tr>
+              <tr><td>Rehab / Sports Physiotherapist</td><td class="num">₹2.5–4 L</td><td class="num">₹5–6 L+</td><td>MPT / Cert. Athletic Trainer</td></tr>
             </tbody>
           </table>
         </div>
@@ -394,7 +399,7 @@ page = f"""<!DOCTYPE html>
 
 <!-- TOUR OVERLAY -->
 <div class="tour" id="tour" aria-hidden="true">
-  <div class="tour-box">
+  <div class="tour-box" role="dialog" aria-modal="true" aria-label="Guided tour">
     <div class="tour-top">
       <span class="tour-title" data-tour-title></span>
       <span class="tour-progress" data-tour-progress></span>
@@ -409,7 +414,7 @@ page = f"""<!DOCTYPE html>
 
 <!-- PDF MODAL -->
 <div class="modal" id="pdfModal">
-  <div class="box">
+  <div class="box" role="dialog" aria-modal="true" aria-label="Document viewer">
     <header><h3 data-modal-title>Document</h3><button class="x" data-close aria-label="Close document">×</button></header>
     <iframe data-modal-frame title="PDF viewer"></iframe>
   </div>

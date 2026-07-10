@@ -137,20 +137,21 @@
     });
   }
 
-  /* ---------------- Audio chapter seeking ---------------- */
+  /* ---------------- Audio/video chapter seeking ---------------- */
   document.querySelectorAll("a[data-seek]").forEach(function (a) {
     a.addEventListener("click", function (e) {
       e.preventDefault();
-      var audio = document.getElementById(a.getAttribute("data-audio"));
-      if (!audio) return;
+      var mediaId = a.getAttribute("data-audio") || a.getAttribute("data-video");
+      var media = document.getElementById(mediaId);
+      if (!media) return;
       var t = parseFloat(a.getAttribute("data-seek"));
       // Start playback synchronously so the click gesture isn't lost (Safari autoplay policy),
       // then move the playhead once metadata is available.
-      try { audio.play(); } catch (err) {}
-      var seek = function () { try { audio.currentTime = t; } catch (err) {} };
-      if (audio.readyState >= 1) seek();
-      else audio.addEventListener("loadedmetadata", seek, { once: true });
-      audio.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "center" });
+      try { media.play(); } catch (err) {}
+      var seek = function () { try { media.currentTime = t; } catch (err) {} };
+      if (media.readyState >= 1) seek();
+      else media.addEventListener("loadedmetadata", seek, { once: true });
+      media.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "center" });
     });
   });
 

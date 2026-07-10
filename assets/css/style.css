@@ -176,9 +176,9 @@ audio { border-radius: 8px; }
 
 .chaplist { display: grid; gap: 8px; margin: 4px 0 0; padding: 0; list-style: none; }
 .chaplist li { display: flex; gap: 12px; align-items: baseline; font-size: .95rem; }
-/* non-clickable timestamps (video chapters) look like plain labels */
+/* base timestamp look (plain label when not wrapped in an <a>) */
 .chaplist .t { font-family: var(--font-mono); color: var(--muted); font-weight: 700; font-size: .86rem; font-variant-numeric: tabular-nums; min-width: 48px; }
-/* clickable timestamps (audio chapters, wrapped in <a>) look like links */
+/* clickable timestamps (audio + video chapters, wrapped in <a data-seek>) look like links */
 .chaplist .t a { color: var(--blue); text-decoration: none; }
 .chaplist .t a:hover { text-decoration: underline; }
 
