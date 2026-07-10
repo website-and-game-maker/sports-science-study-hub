@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 # Generates index.html for the Sports Science Careers study hub.
 # Structure: dropdown-menu nav (Overviews / Deep Dives / Reports) mixing media,
-# two guided arrow-tours (Quick / Deep), and a cheat-sheet reference on the main page.
+# two guided arrow-tours (Quick / Deep), a cross-cutting Media Library (browse by
+# format: video / audio / slideshow / report, regardless of depth-tier), and a
+# cheat-sheet reference on the main page.
 # Facts corrected after web verification (see HANDOFF.md).
 import json, html, re, os
 
@@ -183,6 +185,7 @@ page = f"""<!DOCTYPE html>
         </div>
       </div>
 
+      <a class="nav-flat" href="#library">Media Library</a>
       <a class="nav-flat" href="#reference">Reference</a>
     </div>
     <button class="hamburger" data-hamburger aria-label="Menu">☰</button>
@@ -321,6 +324,112 @@ page = f"""<!DOCTYPE html>
         <p>The full playbook: mapping school subjects to expertise, the 4-year honours bridge, certifications and a strategic checklist.</p>
         <div class="actions"><button class="btn primary" data-pdf="assets/pdf/strategic-roadmap.pdf" data-title="Strategic Career Development Roadmap">Read inline</button>
           <a class="btn" href="assets/pdf/strategic-roadmap.pdf" download>⬇ PDF</a></div>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<!-- MEDIA LIBRARY -->
+<section class="section" id="library">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Section 04 · Browse by format</div>
+      <h2>Media Library</h2>
+      <p>Every video, audio file, slideshow and report in one place — grouped by format instead of depth, so you can jump straight to exactly the kind of media you're after.</p>
+    </div>
+
+    <h3 style="margin-bottom:12px">🎬 Videos</h3>
+    <div class="grid cols-2" style="margin-bottom:34px">
+
+      <div class="card">
+        <div class="media-frame"><img src="assets/thumbs/overview_poster.png" alt="Sports Science Overview video thumbnail"></div>
+        <div class="body">
+          <div class="badges"><span class="badge type">Video</span><span class="badge easy">Easy</span><span class="badge time">⏱ 6 min</span></div>
+          <h3>Sports Science Overview</h3>
+          <p>The friendly introduction: the team behind the athletes, high-performance vs clinical roles, and your pathway in.</p>
+          <div class="row-actions"><a class="btn primary" href="#v-overview">▶ Jump to the player</a></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="media-frame"><img src="assets/thumbs/career_poster.png" alt="The Career Path video thumbnail"></div>
+        <div class="body">
+          <div class="badges"><span class="badge type">Video</span><span class="badge medium">In-depth</span><span class="badge time">⏱ 8.5 min</span></div>
+          <h3>The Career Path (detailed)</h3>
+          <p>Five chapters: the boom, eligibility myths, the curriculum, labs &amp; internships, and lucrative careers.</p>
+          <div class="row-actions"><a class="btn primary" href="#v-career">▶ Jump to the player</a></div>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-bottom:12px">🎧 Audio</h3>
+    <div class="grid cols-2" style="margin-bottom:34px">
+
+      <div class="card audio-card">
+        <div class="body">
+          <div class="badges"><span class="badge type">Audio</span><span class="badge easy">Easy</span><span class="badge time">⏱ 1 min</span></div>
+          <h3>The 60-Second Brief</h3>
+          <p>The whole field in one breath: why it matters, the roles, and how to get in.</p>
+          <div class="row-actions"><a class="btn primary" href="#a-short">▶ Jump to the player</a></div>
+        </div>
+      </div>
+
+      <div class="card audio-card">
+        <div class="body">
+          <div class="badges"><span class="badge type">Audio</span><span class="badge deep">Deep</span><span class="badge time">⏱ 50 min</span></div>
+          <h3>The Full Deep Dive</h3>
+          <p>A two-host conversation covering the myths, NEP 2020, bridge modules, institutions, on-field tech, salaries and certifications.</p>
+          <div class="row-actions"><a class="btn primary" href="#a-long">▶ Jump to the player</a></div>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-bottom:12px">🖼️ Slideshows</h3>
+    <div class="grid cols-2" style="margin-bottom:34px">
+
+      <div class="card">
+        <div class="media-frame"><img src="assets/slides/playbook/tn/s-01.png" alt="The High-Performance Playbook slide preview"></div>
+        <div class="body">
+          <div class="badges"><span class="badge type">Slideshow</span><span class="badge easy">Easy</span><span class="badge time">11 slides</span></div>
+          <h3>The High-Performance Playbook</h3>
+          <p>The companion deck to the Sports Science Overview video — vibrant and skimmable, 11 slides.</p>
+          <div class="row-actions"><a class="btn primary" href="#playbook">🖼️ Jump to the deck</a></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="media-frame"><img src="assets/slides/blueprint/tn/s-01.png" alt="Tactical Blueprint slide preview"></div>
+        <div class="body">
+          <div class="badges"><span class="badge type">Slideshow</span><span class="badge deep">Deep</span><span class="badge time">12 slides</span></div>
+          <h3>Tactical Blueprint: Engineering a Career</h3>
+          <p>The companion deck to The Career Path video — technical and detailed, 12 slides.</p>
+          <div class="row-actions"><a class="btn primary" href="#blueprint">🖼️ Jump to the deck</a></div>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-bottom:12px">📄 Reports</h3>
+    <div class="grid cols-3">
+
+      <div class="card"><div class="body">
+        <div class="doc"><div class="thumb"><img src="assets/thumbs/academic-pathways-1.png" alt=""></div>
+          <div class="meta"><div class="badges"><span class="badge type">Report</span><span class="badge easy">Overview</span></div><h3>Academic Pathways &amp; Career Integration</h3></div></div>
+        <p>Admission frameworks, an institution comparison matrix, curriculum architecture and career roles.</p>
+        <div class="actions"><a class="btn primary" href="#doc-academic">Jump to the report →</a></div>
+      </div></div>
+
+      <div class="card"><div class="body">
+        <div class="doc"><div class="thumb"><img src="assets/thumbs/evolution-education-1.png" alt=""></div>
+          <div class="meta"><div class="badges"><span class="badge type">Report</span><span class="badge medium">Analysis</span></div><h3>The Evolution of Sports Science Education</h3></div></div>
+        <p>Flexible vs rigid pathways, selection weightages, and the “premier lab” differentiator (VICON, altitude chambers).</p>
+        <div class="actions"><a class="btn primary" href="#doc-evolution">Jump to the report →</a></div>
+      </div></div>
+
+      <div class="card"><div class="body">
+        <div class="doc"><div class="thumb"><img src="assets/thumbs/strategic-roadmap-1.png" alt=""></div>
+          <div class="meta"><div class="badges"><span class="badge type">Report</span><span class="badge deep">Strategy</span></div><h3>Strategic Career Development Roadmap</h3></div></div>
+        <p>The full playbook: mapping school subjects to expertise, the 4-year honours bridge, certifications and a strategic checklist.</p>
+        <div class="actions"><a class="btn primary" href="#doc-strategic">Jump to the report →</a></div>
       </div></div>
     </div>
   </div>

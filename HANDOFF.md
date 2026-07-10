@@ -310,4 +310,48 @@ left the tour to view the PDF in a new tab.
   tour a handful of times per session), so left alone rather than reworking `initDeck()`'s fullscreen
   lifecycle to add cleanup — flagging in case it matters for a future refactor.
 
-_Last updated after the tour embedded-deck / inline-PDF pass (2026-07-10)._
+## 12. Media Library — browse by format (2026-07-10)
+
+A direct user follow-up, distinct from the original nav-restructuring request: the site
+already organizes content by **depth** (Overviews = shallow, Deep Dives = long-form — each
+tier holding one video, one audio file and one deck), but there was no way to browse
+**across tiers by format** — e.g. jump straight to "just the videos" regardless of which
+depth-tier they belong to. The user explicitly asked for this as a separate, additional way
+to browse: *"make it easy to view by media type... this is separate from the tours and the
+overviews and the reports."*
+
+- ✅ Added a new flat nav entry, **"Media Library"** (`index.html` + `_source/build_site.py`,
+  next to the existing `Tours` / `Overviews` / `Deep Dives` / `Reports` dropdowns and the
+  `Reference` flat link — placed between `Reports` and `Reference`).
+- ✅ Added a new page section, `id="library"` (`Section 04 · Browse by format`), inserted
+  between the existing `#reports` and `#reference` sections, with four clearly-labeled
+  groups: **🎬 Videos**, **🎧 Audio**, **🖼️ Slideshows**, **📄 Reports**.
+- **Design decision — link-through cards, not duplicated players:** every card in the new
+  section reuses the site's existing `.card` / `.body` / `.badges` / `.badge` / `.doc` /
+  `.media-frame` / `.row-actions` component classes (no new CSS, no new visual language), but
+  instead of re-embedding a second `<video>`/`<audio>`/deck-viewer instance, each card is a
+  lightweight summary (thumbnail + badges + one-line description) with a "Jump to the
+  player/deck/report →" button that anchors straight to the existing `#v-overview`,
+  `#v-career`, `#a-short`, `#a-long`, `#playbook`, `#blueprint`, `#doc-academic`,
+  `#doc-evolution`, `#doc-strategic` elements where the real interactive widget already
+  lives. This was a deliberate choice over duplicating the full players: the audio/video
+  elements have unique `id`s that the chapter-seek JS (`data-seek` + `getElementById`) and
+  the deck JS (`window.DECKS["playbook"|"blueprint"]`) key off of — a second `<audio
+  id="aud-short">` or a second `initDeck()` instance on the same page would either collide
+  on duplicate IDs or double the heavy deck/slide assets for no real benefit. A find-it-fast
+  link-through card gets someone to the right format just as quickly without that risk, and
+  keeping the same approach across all four groups (rather than duplicating some and
+  linking others) keeps the section predictable to scan.
+- Slideshow cards use the deck's own thumbnail (`assets/slides/playbook/tn/s-01.png` /
+  `.../blueprint/tn/s-01.png`) inside `.media-frame`; report cards reuse the exact existing
+  `.doc` thumb+meta+actions markup from the Reports section (same PDF first-page thumbnails).
+  Badge choices (`easy`/`medium`/`deep`, `⏱` time or slide count) mirror the badges already
+  used on each item's home card.
+- `_source/build_site.py`'s page template was updated with the identical nav entry and
+  section (verified via `python3 _source/build_site.py` + `git diff` — regeneration produces
+  only this section/nav addition, nothing else reverted).
+- Scope note: this section only adds a browse-by-format entry point; it does not touch the
+  deck viewer's fullscreen toggle (§10) or the guided tour's internals — those were being
+  worked on concurrently on other branches.
+
+_Last updated after the Media Library (browse-by-format) pass (2026-07-10)._
