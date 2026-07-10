@@ -222,4 +222,31 @@ and closed out the two items that were "Still deferred" above, plus a separate b
   "Samaya Sports Academy"); and in `a-long`, "beat elegance"/"beat logic" (rowing biomechanics tool)
   and "mission pitch vision" (cricket ball-tracking) could not be confidently identified.
 
-_Last updated after the completeness pass (2026-07-10)._
+## 9. Explore→Tours rename + transcript-staleness follow-up (2026-07-10)
+
+- ✅ Nav dropdown renamed "Explore" → "Tours" in `index.html` and `_source/build_site.py` (the
+  two tour-launch buttons inside it are unchanged — only the visible label moved).
+- ✅ Closed the staleness gap flagged in §8: `_source/transcripts/short.txt` and `overview.txt`
+  now carry the same corrections already applied to `index.html` ("Pro-Cobody"/"Pro-Cabody"→
+  "Pro Kabaddi", "any P20"→"NEP 2020", "NCA CSCS"→"NSCA-CSCS", "ACSM EP"→"ACSM-EP", "P-Cumen"→
+  "human", "symbiosis, Jane University, Somaya"→"Symbiosis, Jain University, Somaiya",
+  "canyzeology"→"kinesiology"). Regenerating from `build_site.py` no longer reverts these two
+  transcripts.
+
+## 10. Fullscreen deck viewer (2026-07-10)
+
+- ✅ Added a fullscreen toggle (⛶ button, top-right of the stage) to the slideshow deck viewer —
+  applies to **both** decks (Playbook and Tactical Blueprint) since they share one `initDeck()`
+  function in `app.js`. Uses the real Fullscreen API (`requestFullscreen`/`exitFullscreen`, with
+  vendor-prefixed fallbacks for older engines) and falls back to a manual `.is-fullscreen` CSS
+  class when the API is unavailable, rejected, or hangs (some embedded/`file://` contexts never
+  resolve the promise — a 400ms fallback timer catches that instead of leaving the button inert).
+  While fullscreen, the thumbnail strip (`.deck-foot`, normally outside `.stage`) is reparented
+  inside the stage as a bottom overlay so slide navigation stays reachable; it's moved back on
+  exit. Escape exits (native fullscreen already does this; the manual fallback mode gets its own
+  Escape handler since there's no browser-level fullscreen to auto-exit). Focus lands on the
+  toggle button both entering and exiting so keyboard/screen-reader users aren't stranded.
+  `prefers-reduced-motion` covers the new hover-scale transition. `_source/build_site.py`'s
+  `deck()` template was updated to match, so regeneration doesn't lose the button.
+
+_Last updated after the fullscreen deck viewer pass (2026-07-10)._

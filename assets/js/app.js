@@ -99,9 +99,95 @@
     stage.addEventListener("keydown", function (e) {
       var tag = e.target && e.target.tagName;
       if (tag === "VIDEO" || tag === "AUDIO") return; // let the intro video handle arrow keys
+      // Escape is handled separately below (fullscreen exit) so it isn't fought over here.
       if (e.key === "ArrowRight") { go(idx + 1); e.preventDefault(); }
       if (e.key === "ArrowLeft") { go(idx - 1); e.preventDefault(); }
     });
+
+    /* ---- Fullscreen mode ---- */
+    // Works generically for every deck (playbook + blueprint share this initDeck() call).
+    var fsBtn = stage.querySelector("[data-fullscreen]");
+    var deckFoot = stage.parentElement.querySelector(".deck-foot");
+    var footParent = deckFoot ? deckFoot.parentNode : null;   // where to put deckFoot back on exit
+    var footNext = deckFoot ? deckFoot.nextSibling : null;    // ...and before which sibling
+    var manualFs = false;  // true only when the real Fullscreen API is unavailable/rejected
+    var wasFs = false;     // last state we applied, so unrelated fullscreenchange events are ignored
+    var prevOverflow = null;
+
+    function nativeFsEl() {
+      return document.fullscreenElement || document.webkitFullscreenElement ||
+        document.mozFullScreenElement || document.msFullscreenElement || null;
+    }
+    function isFsActive() { return manualFs || nativeFsEl() === stage; }
+    function setFsState(active) {
+      if (active === wasFs) return;
+      wasFs = active;
+      stage.classList.toggle("is-fullscreen", active);
+      if (fsBtn) {
+        fsBtn.setAttribute("aria-pressed", active ? "true" : "false");
+        fsBtn.setAttribute("aria-label", active ? "Exit fullscreen" : "Enter fullscreen");
+      }
+      // The thumbnail strip normally lives in .deck-foot, outside .stage — reparent it in
+      // so it's still reachable while the stage is fullscreened, then put it back on exit.
+      if (deckFoot) {
+        if (active && deckFoot.parentNode !== stage) stage.appendChild(deckFoot);
+        else if (!active && deckFoot.parentNode === stage && footParent) footParent.insertBefore(deckFoot, footNext);
+      }
+      if (active) { prevOverflow = document.body.style.overflow; document.body.style.overflow = "hidden"; }
+      else { document.body.style.overflow = prevOverflow || ""; prevOverflow = null; }
+      // Land focus on the toggle both entering (so keyboard/screen-reader users aren't stranded
+      // inside the stage) and exiting (restoring focus to the control that changed state).
+      if (fsBtn) fsBtn.focus();
+    }
+    function enterFs() {
+      var fn = stage.requestFullscreen || stage.webkitRequestFullscreen ||
+        stage.mozRequestFullScreen || stage.msRequestFullscreen;
+      if (!fn) { manualFs = true; setFsState(true); return; }
+      var settled = false;
+      // Some embedding contexts (e.g. a restrictive iframe/webview) neither resolve nor reject
+      // the request — it just hangs — instead of rejecting outright. Don't leave the toggle
+      // inert forever waiting on a promise that may never settle: fall back to the manual mode
+      // if nothing happened after a short beat.
+      var fallbackTimer = setTimeout(function () {
+        if (!settled && nativeFsEl() !== stage) { manualFs = true; setFsState(true); }
+      }, 400);
+      var res;
+      try { res = fn.call(stage); } catch (err) { res = null; }
+      if (res && typeof res.catch === "function") {
+        res.then(
+          function () { settled = true; clearTimeout(fallbackTimer); /* fullscreenchange syncs state */ },
+          function () { settled = true; clearTimeout(fallbackTimer); manualFs = true; setFsState(true); }
+        );
+      } else {
+        // Synchronous throw, or a non-Promise legacy vendor-prefixed API — no need to wait.
+        settled = true; clearTimeout(fallbackTimer);
+        manualFs = true; setFsState(true);
+      }
+    }
+    function exitFs() {
+      if (nativeFsEl() === stage) {
+        var fn = document.exitFullscreen || document.webkitExitFullscreen ||
+          document.mozCancelFullScreen || document.msExitFullscreen;
+        if (fn) { try { fn.call(document); } catch (err) {} }
+        return;
+      }
+      if (manualFs) { manualFs = false; setFsState(false); }
+    }
+    if (fsBtn) {
+      fsBtn.addEventListener("click", function () { if (isFsActive()) exitFs(); else enterFs(); });
+    }
+    ["fullscreenchange", "webkitfullscreenchange", "mozfullscreenchange", "MSFullscreenChange"].forEach(function (evt) {
+      document.addEventListener(evt, function () {
+        if (nativeFsEl() === stage) { manualFs = false; setFsState(true); }
+        else if (!manualFs) { setFsState(false); }
+      });
+    });
+    // Native fullscreen already exits itself on Escape (which fires the listener above); this
+    // covers the manual fallback mode, which has no browser-level fullscreen to auto-exit.
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && isFsActive()) exitFs();
+    });
+
     slides.forEach(function (s) { var im = new Image(); im.src = s; });
     render();
   }

@@ -90,6 +90,7 @@ def deck(deck_id, theme, title, count, folder, meta, intro_video, cap, cap_sub, 
     <button class="nav-btn prev" data-prev aria-label="Previous slide">‹</button>
     <button class="nav-btn next" data-next aria-label="Next slide">›</button>
     <div class="counter"><span data-counter>Intro</span></div>
+    <button class="nav-btn fs-btn" data-fullscreen aria-label="Enter fullscreen" aria-pressed="false">⛶</button>
   </div>
   <div class="deck-foot"><div class="thumbs" data-thumbs></div></div>
   <script>window.DECKS=window.DECKS||{{}};window.DECKS["{deck_id}"]={{slides:{slides_json(folder,count)},thumbs:{thumbs_json(folder,count)}}};</script>
