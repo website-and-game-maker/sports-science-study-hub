@@ -15,9 +15,13 @@ generator for regenerating `index.html`, but it currently only knows how to prod
 
 ## 1. How to open / preview
 
-- Open `index.html` in a browser (double-click, or `file://…/Website/index.html`), or serve
-  the `Website/` folder with any static file server (`python3 -m http.server`) and open it,
-  or visit the deployed GitHub Pages URL.
+- **Live:** https://website-and-game-maker.github.io/sports-science-study-hub/
+- Or open `index.html` in a browser (double-click, or `file://…/Website/index.html`), or serve
+  the `Website/` folder with any static file server (`python3 -m http.server`) and open it.
+- Repo: https://github.com/website-and-game-maker/sports-science-study-hub (public, so free
+  GitHub Pages works on a personal account — the content itself isn't sensitive). Pages is
+  configured to build from the `main` branch root, which is this `Website/` folder itself
+  (the git repo's root *is* `Website/`, not the parent folder).
 - All 7 pages and all media are self-contained inside `Website/` — the folder no longer needs
   to sit next to the original source media (see §4, gotcha 1 — this used to be a real
   requirement and no longer is).
