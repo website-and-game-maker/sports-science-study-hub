@@ -122,6 +122,32 @@ h1, h2, h3, h4 { font-family: var(--font-display); line-height: 1.12; margin: 0 
   border-radius: 999px; font-weight: 600; font-size: .9rem; color: #eaf0ff;
 }
 .chip b { color: var(--lime); }
+/* tldr + chips sit side by side in the hero; chips become a vertical stack in that column
+   (mobile reverts to the original horizontal-wrapping row — see Responsive section). */
+.hero-top { display: flex; gap: 24px; align-items: stretch; margin-top: 28px; flex-wrap: wrap; }
+.hero-top .tldr { margin-top: 0; flex: 1 1 480px; }
+.hero-top .chips { flex: 0 0 240px; flex-direction: column; margin-top: 0; }
+
+/* ---------- Start here (homepage quick-start band) ---------- */
+#start-here { background: var(--panel); }
+.start-here-card {
+  position: relative; overflow: hidden; border-radius: var(--radius);
+  background: var(--grad-hero); padding: 28px;
+}
+.start-here-card::after {
+  content: ""; position: absolute; inset: 0; opacity: .28; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+  background-size: 44px 44px;
+  -webkit-mask-image: radial-gradient(700px 380px at 85% 0%, #000, transparent 70%);
+  mask-image: radial-gradient(700px 380px at 85% 0%, #000, transparent 70%);
+}
+.start-here-grid { position: relative; z-index: 1; display: grid; grid-template-columns: 1.3fr 1fr; gap: 22px; }
+.start-here-card h3 { color: #fff; }
+.start-here-card p { color: #b9c6e6; margin: 0; }
+.start-here-card .badge { background: rgba(255,255,255,.08); color: #eaf0ff; border-color: rgba(255,255,255,.14); }
+.start-here-note { margin: 18px 0 0; color: var(--muted); font-size: .92rem; max-width: 74ch; }
 
 /* ---------- Generic cards ---------- */
 .grid { display: grid; gap: 24px; }
@@ -397,6 +423,8 @@ table.ref tbody tr:hover { background: var(--panel-2); }
 /* ---------- Responsive ---------- */
 @media (max-width: 900px) {
   .grid.cols-2, .grid.cols-3 { grid-template-columns: 1fr; }
+  .start-here-grid { grid-template-columns: 1fr; }
+  .hero-top .chips { flex: 1 1 100%; flex-direction: row; flex-wrap: wrap; }
   .doc { grid-template-columns: 100px 1fr; }
   .nav-links { position: absolute; top: 64px; left: 0; right: 0; background: #0d1832;
     flex-direction: column; align-items: stretch; gap: 2px; padding: 10px; display: none;
