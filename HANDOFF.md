@@ -439,4 +439,116 @@ that as a final product."
   under GitHub's 100 MB hard per-file limit, so no Git LFS is needed (a routine "large file"
   warning on push is expected and harmless).
 
-_Last updated after the page-split + media-localization pass (2026-07-10)._
+## 14. Mobile optimization pass (2026-07-12)
+
+A general "optimize for mobile" request. The site already had solid mobile fundamentals
+(viewport meta, a hamburger nav, a single 900px breakpoint collapsing all grids to one
+column, 44px+ touch targets on the deck/tour controls, `prefers-reduced-motion` support),
+so this pass focused on auditing real rendered behavior at a 375px width via the browser
+preview rather than assuming the existing responsive CSS was sufficient — and found two
+genuine narrow-viewport-only overlap bugs plus two affordance gaps:
+
+- ✅ **Deck intro caption vs. nav buttons/fullscreen toggle** (`assets/css/style.css`,
+  `.intro-wrap .cap` mobile rule): the two on-page slideshow decks (Playbook, Blueprint)
+  open on a companion-video "intro" slide with a caption overlay pinned to the top of
+  `.stage`. At desktop widths the caption comfortably clears the vertically-centered
+  prev/next circles and the fullscreen button (measured ~165px of clearance). But
+  `.stage` uses `aspect-ratio: 16/9`, so its pixel height shrinks fast on a phone while the
+  caption's two-line wrapped text stays just as tall — at 375px width they measurably
+  overlapped (caption bottom 357px vs. button top 307px). Fixed by truncating the caption
+  to a single ellipsized line and hiding the secondary sub-caption span under the existing
+  900px breakpoint, with right-padding reserved so the ellipsis stops before reaching the
+  fullscreen button. Verified via exact `getBoundingClientRect()` measurements before/after,
+  not just visual inspection.
+- ✅ **Guided tour arrows vs. cover-slide text** (`assets/css/style.css`, `.tour-arrow` /
+  `.tour-stage` mobile rules): same root cause in the tour overlay — the 50px arrow circles
+  sit at 50% of `.tour-stage` regardless of content length, and a cover slide's sub-copy
+  wraps to 3 lines on a phone, running directly under the "next" arrow (confirmed
+  overlapping rects both horizontally and vertically). Fixed by shrinking the arrows to
+  40px, tucking them to the stage's outer 6px edge, and widening `.tour-stage`'s side
+  padding to 52px on mobile so slide text never reaches that column, regardless of how
+  much it wraps.
+- ✅ **Touch swipe for the deck viewer and guided tour** (`assets/js/app.js`, new
+  `addSwipe()` helper wired into `initDeck()` and the tour engine): neither carousel had
+  any touch gesture support — a phone user had to tap the small arrow circles repeatedly.
+  Added a shared touchstart/touchend swipe detector (left = next, right = prev) that
+  ignores touches starting on `video`, `audio`, `button`, `a`, `input`, `.thumbs`, or
+  `.tour-dots` (so scrubbing a video/audio progress bar or tapping a thumbnail/dot isn't
+  hijacked), and requires a clearly horizontal drag (`|dx| > 40` and `|dx| > |dy| * 1.5`)
+  so vertical page-scroll gestures pass through untouched. Verified with synthetic
+  `TouchEvent`/`Touch` dispatches: a drag starting on a `<video>` element didn't navigate,
+  a mostly-vertical drag didn't navigate, and a genuine horizontal drag on the stage
+  background did.
+- ✅ **Reference table scroll affordance** (`assets/css/style.css`, `.tablewrap`): the
+  institutions table (`min-width: 620px` inside an `overflow-x: auto` wrapper) has no
+  scrollbar on touch devices and no visual hint that it scrolls horizontally — easy to
+  miss the right-hand columns on a phone. Added the classic dual-`background-attachment`
+  (`local` + `scroll`) shadow-fade trick: a subtle dark fade appears at whichever edge
+  still has more content, and disappears once you've scrolled to that side. Applies at
+  every viewport width, not just mobile, but is inert (invisible) whenever the table
+  already fits without scrolling — confirmed by screenshot at both a 375px and an
+  ~800px+ width.
+- Verified all four fixes live in the browser preview (a local `http.server` serving
+  `Website/` directly, since media is now localized under `assets/media/` per §13) at a
+  375×812 viewport, not just by reading the CSS — including before/after
+  `getBoundingClientRect()` measurements for the two overlap bugs and synthetic touch-event
+  dispatches for the swipe gesture, since the preview tool's pointer is mouse-based and
+  can't itself simulate a touch drag.
+- Scope note: did not touch `_source/build_site.py` — per §13 it only regenerates the old
+  single-page layout and isn't part of the current 7-page site, and neither CSS nor JS is
+  templated by it regardless.
+
+## 15. Homepage redesign code review — 24 findings, 13 fixed (2026-07-12)
+
+A separate Claude Design session proposed a homepage refresh (chips moved beside the hero's
+"big idea" box into a new `.hero-top` row; a new "Start here" section with a real embedded
+video + audio between the hero and "Explore the hub"), which landed as commit `020197b`.
+Ran an xhigh-effort review (10 finder angles + 1-vote verify + gap sweep) against that diff,
+focused on the user's explicit priority — is the new homepage design consistent with the rest
+of the site? All 24 candidates survived verification; fixed the ones worth fixing:
+
+- ✅ **`.start-here-grid` had no `align-items`** — default grid stretch forced the shorter
+  audio column to match the taller video column's height, leaving ~168px of dead space under
+  the audio player. Added `align-items: start`.
+- ✅ **`.start-here-card .badge` was dead code** — tied in specificity with `.badge.type`/
+  `.badge.time` (declared later in the file), so the intended translucent dark-card badge
+  style never applied; the "Video"/"Audio" pills rendered in their default `--ink` styling,
+  nearly invisible against the card's own dark gradient. Retargeted to
+  `.start-here-card .badge.type, .start-here-card .badge.time` to win on specificity.
+- ✅ **Inserting `#start-here` silently flipped `#next`'s background** — shifting `#next`
+  from `<body>`'s 3rd (odd) to 4th (even) child newly matched the pre-existing
+  `.section:nth-child(even)` zebra rule, turning "Explore the hub" from grey to white and
+  erasing the section-alternation seam (the only page where that rule's parity math is ever
+  exercised across multiple sections). Gave both sections an explicit background
+  (`#start-here` / `#next`) instead of leaving it to sibling-position math.
+- ✅ **`.audio-shell`'s ink gradient nearly invisible on the card's own `--grad-hero`** —
+  both are similar dark navy, so the audio player didn't read as a distinct panel. Reused
+  the hero's own translucent glass-panel treatment (`rgba(255,255,255,.06)` + `.14` border —
+  the same one `.tldr`/`.chip` already use) instead of inventing a new one.
+- ✅ **Missing difficulty badges** — the two Start Here teasers showed only `type + time`,
+  while the identical items on `overviews.html`/`library.html` show `type + easy/medium/deep
+  + time`. Added the (already-accurate) "Easy" badge to both for consistency.
+  Also fixed a heading-size fallback (new `<h3>`s weren't inside `.card` so missed the
+  site-wide `1.22rem` sizing) and an ambiguous copy edit ("or" implied either/or when the
+  "7 minutes" claim needs both watched back to back — changed to "and").
+- ✅ **Cleanup**: removed the redundant set-then-unset `margin-top` on `.tldr`/`.chips` (their
+  only call site is now `.hero-top`, which already provides the spacing); replaced four
+  scattered inline `style="margin-top:..."` attributes with one `.start-here-grid > div`
+  flex rule (mirrors the existing `.card .body { gap }` convention); merged the identical
+  static parts of `.hero::after`/`.start-here-card::after` (two near-duplicate decorative
+  grid-texture overlays) into one combined selector, keeping only their differing numbers
+  separate; made `.start-here-grid` reuse `.grid`'s shared `display:grid`/gap instead of
+  redeclaring both, keeping just its own `1.3fr 1fr` column ratio.
+- Not fixed (deliberately): a few findings about factoring the whole "dark hero-style
+  surface" (gradient + grid-texture + light text) into a reusable modifier class, since only
+  two instances of it exist site-wide so far — worth doing if a third ever shows up, not
+  before. Also left the mask-size-vs-card-size proportion as-is after visual inspection
+  looked fine at multiple viewports. Did not touch `assets/js/app.js`'s swipe-gesture code
+  (§14) even though the review's gap sweep flagged a possible double-fire between the outer
+  tour stage and the nested embedded-deck stage sharing `addSwipe()` — that's the other
+  in-progress feature's concern, out of scope for this homepage-only review.
+- Verified all fixes live in the browser (computed-style checks for the badge/grid fixes,
+  full-page screenshots at desktop and 375px) and spot-checked `overviews.html` and
+  `reference.html` to confirm the shared CSS changes didn't regress any other page.
+
+_Last updated after the homepage redesign review (2026-07-12)._

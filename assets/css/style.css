@@ -96,8 +96,12 @@ h1, h2, h3, h4 { font-family: var(--font-display); line-height: 1.12; margin: 0 
 
 /* ---------- Hero ---------- */
 .hero { background: var(--grad-hero); color: #eaf0ff; position: relative; overflow: hidden; }
+/* Decorative grid-texture-plus-fade overlay, shared by the hero and the homepage's
+   start-here card (its own dark, hero-toned surface) — geometry differs per box size,
+   so only the static parts are combined here. */
+.hero::after, .start-here-card::after { content: ""; position: absolute; inset: 0; pointer-events: none; }
 .hero::after {
-  content: ""; position: absolute; inset: 0; opacity: .32; pointer-events: none;
+  opacity: .32;
   background-image:
     linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
@@ -109,13 +113,13 @@ h1, h2, h3, h4 { font-family: var(--font-display); line-height: 1.12; margin: 0 
 .hero h1 { color: #fff; font-size: clamp(2.2rem, 5.2vw, 4rem); font-weight: 800; max-width: 15ch; }
 .hero .lede { font-size: clamp(1.05rem, 2vw, 1.3rem); color: #b9c6e6; max-width: 62ch; margin: 18px 0 8px; }
 .hero .tldr {
-  margin-top: 28px; max-width: 74ch; background: rgba(255,255,255,.06);
+  max-width: 74ch; background: rgba(255,255,255,.06);
   border: 1px solid rgba(255,255,255,.12); border-radius: var(--radius);
   padding: 20px 22px; color: #d7e0f5; font-size: 1.02rem;
 }
 .hero .tldr b { color: #fff; }
 
-.chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+.chips { display: flex; flex-wrap: wrap; gap: 10px; }
 .chip {
   display: inline-flex; align-items: center; gap: 8px; padding: 9px 15px;
   background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14);
@@ -123,19 +127,24 @@ h1, h2, h3, h4 { font-family: var(--font-display); line-height: 1.12; margin: 0 
 }
 .chip b { color: var(--lime); }
 /* tldr + chips sit side by side in the hero; chips become a vertical stack in that column
-   (mobile reverts to the original horizontal-wrapping row — see Responsive section). */
+   (mobile reverts to the original horizontal-wrapping row — see Responsive section). Both
+   children's own margin-top is intentionally gone (moved here) since .hero-top is now their
+   only call site — no other page uses .tldr/.chips standalone. */
 .hero-top { display: flex; gap: 24px; align-items: stretch; margin-top: 28px; flex-wrap: wrap; }
-.hero-top .tldr { margin-top: 0; flex: 1 1 480px; }
-.hero-top .chips { flex: 0 0 240px; flex-direction: column; margin-top: 0; }
+.hero-top .tldr { flex: 1 1 480px; }
+.hero-top .chips { flex: 0 0 240px; flex-direction: column; align-items: stretch; }
 
 /* ---------- Start here (homepage quick-start band) ---------- */
+/* Explicit background, independent of the .section:nth-child(even) zebra rule — this section's
+   sibling position can shift as content is added/reordered, and its background shouldn't. */
 #start-here { background: var(--panel); }
+#next { background: var(--panel-2); }
 .start-here-card {
   position: relative; overflow: hidden; border-radius: var(--radius);
   background: var(--grad-hero); padding: 28px;
 }
 .start-here-card::after {
-  content: ""; position: absolute; inset: 0; opacity: .28; pointer-events: none;
+  opacity: .28;
   background-image:
     linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
@@ -143,10 +152,16 @@ h1, h2, h3, h4 { font-family: var(--font-display); line-height: 1.12; margin: 0 
   -webkit-mask-image: radial-gradient(700px 380px at 85% 0%, #000, transparent 70%);
   mask-image: radial-gradient(700px 380px at 85% 0%, #000, transparent 70%);
 }
-.start-here-grid { position: relative; z-index: 1; display: grid; grid-template-columns: 1.3fr 1fr; gap: 22px; }
-.start-here-card h3 { color: #fff; }
+/* Reuses .grid's display:grid + 24px gap; only the column ratio is start-here-specific. */
+.start-here-grid { position: relative; z-index: 1; grid-template-columns: 1.3fr 1fr; align-items: start; }
+.start-here-grid > div { display: flex; flex-direction: column; gap: 14px; }
+.start-here-card h3 { color: #fff; margin: 0; font-size: 1.22rem; }
 .start-here-card p { color: #b9c6e6; margin: 0; }
-.start-here-card .badge { background: rgba(255,255,255,.08); color: #eaf0ff; border-color: rgba(255,255,255,.14); }
+.start-here-card .badge.type, .start-here-card .badge.time { background: rgba(255,255,255,.08); color: #eaf0ff; border-color: rgba(255,255,255,.14); }
+/* .audio-shell's own ink gradient is nearly invisible on this card's own dark --grad-hero —
+   reuse the hero's own translucent glass-panel treatment (same one .tldr/.chip already use)
+   instead, so the player reads as a distinct panel. */
+.start-here-card .audio-shell { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.14); }
 .start-here-note { margin: 18px 0 0; color: var(--muted); font-size: .92rem; max-width: 74ch; }
 
 /* ---------- Generic cards ---------- */
@@ -287,7 +302,24 @@ audio { border-radius: 8px; }
 .doc .actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
 
 /* ---------- Reference tables ---------- */
-.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); box-shadow: var(--shadow-sm); }
+/* Horizontal-scroll shadow hint (classic "local vs scroll" background-attachment trick):
+   the two cover gradients scroll WITH the table content and mask the shadow near
+   whichever edge you're already at, so the fade only shows on the side that still
+   has more to scroll — this matters on mobile where a wide table has no scrollbar
+   to signal "there's more here". */
+.tablewrap {
+  position: relative; overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  background:
+    linear-gradient(to right, var(--panel) 30%, rgba(255,255,255,0)) 0 0,
+    linear-gradient(to left, var(--panel) 30%, rgba(255,255,255,0)) 100% 0,
+    linear-gradient(to right, rgba(16,24,40,.16), rgba(16,24,40,0)) 0 0,
+    linear-gradient(to left, rgba(16,24,40,.16), rgba(16,24,40,0)) 100% 0;
+  background-repeat: no-repeat;
+  background-color: var(--panel);
+  background-size: 24px 100%, 24px 100%, 10px 100%, 10px 100%;
+  background-attachment: local, local, scroll, scroll;
+}
 table.ref { border-collapse: collapse; width: 100%; font-size: .92rem; min-width: 620px; font-variant-numeric: tabular-nums; }
 /* ₹ figures in a monospace so the numeric columns line up like a readout */
 td.num { font-family: var(--font-mono); font-size: .84rem; letter-spacing: -.02em; white-space: nowrap; }
@@ -437,4 +469,25 @@ table.ref tbody tr:hover { background: var(--panel-2); }
   .menu-item b { color: #eaf0ff; } .menu-item span { color: #9fb0cf; }
   .menu-item:hover { background: rgba(255,255,255,.08); }
   .hamburger { display: block; }
+
+  /* Deck intro caption + fullscreen toggle: at narrow widths the .stage box (aspect-ratio
+     16/9) gets short enough in absolute pixels that the two-line wrapped caption grows tall
+     enough to run under the vertically-centered prev/next arrows and the fs button. Trim the
+     caption to a single truncated line and reserve space on the right for the fs button so it
+     always clears both. */
+  .intro-wrap .cap {
+    padding: 9px 46px 9px 14px; font-size: .82rem;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .intro-wrap .cap span { display: none; }
+
+  /* Guided tour arrows: same clearance problem as above — a cover slide's sub-copy can wrap
+     to 3 lines on a phone width and run directly under the 50px arrow circles, which sit at
+     50% of the whole stage regardless of text length. Shrink the arrows, tuck them into the
+     stage's outer edge, and widen the stage's side padding so slide content never reaches
+     that column. */
+  .tour-stage { padding: 22px 52px; }
+  .tour-arrow { width: 40px; height: 40px; font-size: 20px; }
+  .tour-arrow.prev { left: 6px; }
+  .tour-arrow.next { right: 6px; }
 }

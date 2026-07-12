@@ -7,6 +7,30 @@
   function prefersReducedMotion() {
     return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   }
+  // Left/right swipe on touch devices for carousel-like surfaces (deck viewer, tour).
+  // Skips touches starting on media/controls so video scrubbing and thumbnail/dot taps
+  // aren't hijacked, and requires a clearly horizontal drag so vertical page scroll
+  // still works normally.
+  function addSwipe(el, onSwipeLeft, onSwipeRight) {
+    var sx = 0, sy = 0, tracking = false;
+    el.addEventListener("touchstart", function (e) {
+      var t = e.target;
+      if (e.touches.length !== 1 || (t.closest && t.closest("video,audio,button,a,input,.thumbs,.tour-dots"))) {
+        tracking = false; return;
+      }
+      sx = e.touches[0].clientX; sy = e.touches[0].clientY; tracking = true;
+    }, { passive: true });
+    el.addEventListener("touchend", function (e) {
+      if (!tracking) return;
+      tracking = false;
+      var t = e.changedTouches[0];
+      var dx = t.clientX - sx, dy = t.clientY - sy;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+        if (dx < 0) onSwipeLeft(); else onSwipeRight();
+      }
+    }, { passive: true });
+  }
+
   // Keep Tab focus inside an open overlay (dialog/tour).
   function trapTab(e, container) {
     if (!container) return;
@@ -104,6 +128,7 @@
     function go(i) { var min = intro ? -1 : 0; idx = Math.max(min, Math.min(slides.length - 1, i)); render(); }
     stage.querySelector("[data-next]").addEventListener("click", function () { go(idx + 1); });
     stage.querySelector("[data-prev]").addEventListener("click", function () { go(idx - 1); });
+    addSwipe(stage, function () { go(idx + 1); }, function () { go(idx - 1); });
     stage.setAttribute("tabindex", "0");
     stage.addEventListener("keydown", function (e) {
       var tag = e.target && e.target.tagName;
@@ -375,6 +400,9 @@
       go(at + 1);
     });
     tourEl.querySelector("[data-tour-close]").addEventListener("click", close);
+    // Swiping left/right on the stage itself steps through the tour, same as the arrows —
+    // .click() is a no-op on a disabled button, so swiping past either end just stops there.
+    addSwipe(stage, function () { nextBtn.click(); }, function () { prevBtn.click(); });
     // True while an embedded deck (inside a "deck"-type tour stop) is fullscreen, whether via
     // the real Fullscreen API or the manual .is-fullscreen fallback — so a stray Escape press
     // that's really meant to back out of fullscreen doesn't also close the whole tour.
